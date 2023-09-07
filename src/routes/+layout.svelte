@@ -1,6 +1,37 @@
 <script>
-	import Header from './Header.svelte';
 	import './styles.css';
+
+	import { page } from '$app/stores';
+	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
+	import { chainId, defaultEvmStores, connected } from 'svelte-ethers-store';
+	import { goto } from '$app/navigation';
+
+	onMount(() => {
+		// defaultEvmStores.setProvider();
+		if (browser) {
+			if (sessionStorage.getItem('accnt')?.length) {
+				// console.log('found our session storage');
+				defaultEvmStores.setProvider();
+
+				// console.log('PAGE\n', $page);
+			} else {
+				// defaultEvmStores.setProvider();
+			}
+		} else {
+			console.log('window not found');
+			// defaultEvmStores.setProvider();
+		}
+	});
+
+	$: if ($connected && $page.route.id == '/') {
+		console.log('current page id', $page.route.id);
+		goto('/home');
+	}
+
+	$: if (!$connected && $page.route.id != '/') {
+		goto('/');
+	}
 </script>
 
 <div class="app">

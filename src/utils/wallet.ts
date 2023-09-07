@@ -1,5 +1,6 @@
 import { defaultEvmStores } from 'svelte-ethers-store';
 // import { mainDefaultChainId } from 'src/utils/provider';
+import { utils } from 'ethers';
 
 export async function connectWallet(signerAddress: string) {
 	try {
@@ -25,6 +26,7 @@ export async function addMumbaiNetwork() {
 			params: [
 				{
 					chainId: '0x80001',
+					// chainId: utils.hexValue(80001),
 					chainName: 'Mumbai Testnet',
 					nativeCurrency: {
 						name: 'Matic',
