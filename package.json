@@ -34,7 +34,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@0xsequence/multicall": "^1.2.0",
+		"@0xsequence/multicall": "^0.43.29",
 		"ethers": "^5.7.2",
 		"svelte-ethers-store": "^2.6.1",
 		"svelte-web3": "^4.3.1",

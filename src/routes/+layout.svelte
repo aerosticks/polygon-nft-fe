@@ -24,14 +24,16 @@
 		}
 	});
 
-	$: if ($connected && $page.route.id == '/') {
-		console.log('current page id', $page.route.id);
-		goto('/home');
-	}
+	// $: if ($connected && $page.route.id == '/') {
+	// 	console.log('current page id', $page.route.id);
+	// 	if (window?.ethereum) {
+	// 		goto('/home');
+	// 	}
+	// }
 
-	$: if (!$connected && $page.route.id != '/') {
-		goto('/');
-	}
+	// $: if (!$connected && $page.route.id != '/') {
+	// 	goto('/');
+	// }
 </script>
 
 <div class="app">
