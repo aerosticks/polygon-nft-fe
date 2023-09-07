@@ -1,31 +1,27 @@
 <script>
-	import Counter from './Counter.svelte';
-	import welcome from '$lib/images/svelte-welcome.webp';
-	import welcome_fallback from '$lib/images/svelte-welcome.png';
+	import { chainId, connected, defaultEvmStores, signerAddress } from 'svelte-ethers-store';
+	import { connectWallet, switchNetwork, addMumbaiNetwork } from 'src/utils/wallet';
+	// import { mainDefaultChainId } from 'src/utils/provider';
 </script>
 
-<svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
-</svelte:head>
-
-<section>
-	<h1>
-		<span class="welcome">
-			<picture>
-				<source srcset={welcome} type="image/webp" />
-				<img src={welcome_fallback} alt="Welcome" />
-			</picture>
-		</span>
-
-		to your new<br />SvelteKit app
-	</h1>
-
-	<h2>
-		try editing <strong>src/routes/+page.svelte</strong>
-	</h2>
-
-	<Counter />
+<section class="space-y-4">
+	<h1>Welcome to Polygon (Mumbai) NFT - Chain Battles</h1>
+	<button
+		class={'border p-2 rounded-lg hover:bg-slate-300 ' + ($connected ? 'hidden ' : '')}
+		on:click={(_) => connectWallet($signerAddress)}
+	>
+		Connect Wallet to Enter
+	</button>
+	<button
+		class={'border p-2 rounded-lg hover:bg-slate-300 ' +
+			($chainId == 80001 && $connected ? ' ' : 'hidden')}
+		on:click={(_) => switchNetwork()}
+	>
+		Switch Networks
+	</button>
+	<div class="hover:underline cursor-pointer" on:click={(_) => addMumbaiNetwork()}>
+		<p>Add Polygon Mumbai test network to metamask</p>
+	</div>
 </section>
 
 <style>
