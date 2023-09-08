@@ -7,12 +7,13 @@ const asyncMintCharEvents = async (sdk: PolygonMumbaiSdk) => {
 	let events = await sdk.CHAINBATTLES.queryFilter('Minted', 39851776, 'latest');
 
 	const filteredInfo = await decodeMintedEvents(events);
+	// console.log('filtered events\n', filteredInfo);
 	return filteredInfo;
 };
 
 export type MintedEvents = {
 	owner: string;
-	tokenId: string;
+	tokenId: number;
 };
 
 export const mintCharEvents: Readable<MintedEvents[]> = derived([sdk], ([$sdk], set) => {
@@ -25,11 +26,12 @@ export const mintCharEvents: Readable<MintedEvents[]> = derived([sdk], ([$sdk], 
 });
 
 async function decodeMintedEvents(mintEvents) {
+	// console.log('decode events\n', mintEvents);
 	let mintChars = [];
 	for (let i = 0; i < mintEvents.length; i++) {
 		const mint = {
 			owner: mintEvents[i].args.owner,
-			tokenId: mintEvents[i].args.tokenId.toString()
+			tokenId: mintEvents[i].args.tokenId.toNumber()
 		};
 		mintChars.push(mint);
 	}
