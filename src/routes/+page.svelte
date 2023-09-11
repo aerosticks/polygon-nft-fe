@@ -8,12 +8,19 @@
 
 <section class="space-y-4">
 	<h1>Welcome to Polygon (Mumbai) NFT - Chain Battles</h1>
-	<button
+	<a
+		href="/nfts"
+		class="border p-2 text-black hover:font-bold cursor-pointer rounded-lg bg-slate-200 hover:bg-slate-300"
+		>Enter Dapp</a
+	>
+	<!-- <button
 		class={'border p-2 rounded-lg hover:bg-slate-300 bg-slate-200 ' + ($connected ? 'hidden ' : '')}
-		on:click={(_) => connectWallet($signerAddress)}
+		on:click={(_) => {
+			connectWallet($signerAddress);
+		}}
 	>
 		Connect Wallet to Enter
-	</button>
+	</button> -->
 	<!-- <button
 		class={'border p-2 rounded-lg hover:bg-slate-300 ' +
 			($chainId != 80001 && $connected ? ' ' : 'hidden')}

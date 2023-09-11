@@ -4,6 +4,8 @@ import { connected, signer, signerAddress } from 'svelte-ethers-store';
 import type { PolygonMumbaiSdk } from 'eth-sdk/build';
 
 const asyncGetCharacterNFT = async (sdk: PolygonMumbaiSdk, tokenId: number) => {
+	console.log('SDK INFO', sdk);
+	console.log('char stats token id search ', tokenId, sdk.CHAINBATTLES);
 	let nft = await sdk.CHAINBATTLES.getCharacterStats(tokenId);
 
 	console.log('CHAR STATS\n', nft);
@@ -71,3 +73,20 @@ function decodeJSON(encodedURI: string) {
 
 	return jsonData;
 }
+
+const asyncTrainNft = async (sdk: PolygonMumbaiSdk, tokenId: number, signer) => {
+	let nftTrained = await sdk.CHAINBATTLES?.connect(signer).train(tokenId);
+
+	return nftTrained;
+};
+
+export const trainNft = (tokenId: number) =>
+	derived([sdk, signer], ([$sdk, $signer], set) => {
+		if (!$sdk) return;
+		asyncTrainNft($sdk, tokenId, $signer)
+			.then((res) => {
+				console.log('train results ', res);
+				set(res);
+			})
+			.catch((err) => console.error(err));
+	});

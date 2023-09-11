@@ -7,6 +7,8 @@
 	import { chainId, defaultEvmStores, connected } from 'svelte-ethers-store';
 	import { goto } from '$app/navigation';
 
+	import NavBar from 'src/routes/navigation/+page.svelte';
+
 	onMount(() => {
 		// defaultEvmStores.setProvider();
 		if (browser) {
@@ -37,6 +39,7 @@
 </script>
 
 <div class="app">
+	<NavBar />
 	<main>
 		<slot />
 	</main>
@@ -49,6 +52,8 @@
 		display: flex;
 		flex-direction: column;
 		min-height: 100vh;
+		margin-left: 4rem;
+		margin-right: 4rem;
 	}
 
 	main {
