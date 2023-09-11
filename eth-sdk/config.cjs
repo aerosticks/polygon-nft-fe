@@ -3,7 +3,7 @@ const sdk = require('@dethcrypto/eth-sdk');
 module.exports = sdk.defineConfig({
 	contracts: {
 		polygonMumbai: {
-			CHAINBATTLES: '0x6652Fce06A0c0C7397f396B6C0D259B2e7fcc8b1'
+			CHAINBATTLES: '0x3E1aF451494163d1a698E8b8f9E30b4904087F00'
 		}
 	},
 	outputPath: 'eth-sdk/build/'

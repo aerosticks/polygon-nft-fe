@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { getCharacterNFT, getTokenURI, getAllTokenURI, trainNft } from 'src/hooks/characters';
+	import { getCharacterNFT, getTokenURI, getAllTokenURI, getXP, getRequiredXP } from 'src/hooks/characters';
     import { mintCharEvents, attackEvents, burnedEvents, trainedEvents, type MintedEvents } from 'src/hooks/events';
     import {
 		chainId,
@@ -18,14 +18,18 @@
 
     import EnemyDetails from 'src/routes/details/enemy.svelte';
 
-	$: console.log('PAGE DATA', $page.params.slug);
+    $: console.log('XP\n', $getXP)
+
+	// $: console.log('PAGE DATA', $page.params.slug);
     $: console.log('attacks', $attackEvents)
 
 	$: nftURI = getTokenURI(Number($page?.params?.slug));
 	$: nftChar = getCharacterNFT(Number($page?.params?.slug));
 
-	$: console.log('CHAR STATS', $nftChar);
-	$: console.log('NFT URI', $nftURI);
+    $: requiredXP = getRequiredXP(Number($page?.params?.slug))
+
+	// $: console.log('CHAR STATS', $nftChar);
+	// $: console.log('NFT URI', $nftURI);
 
     $: mintedEvents = $connected ? sortByOwner($mintCharEvents || []) : $mintCharEvents || [];
 	$: console.log('MINTED by Owner ', mintedEvents || []);
@@ -71,7 +75,7 @@
 				<p>Class: {$nftChar?.class || ''}</p>
 				<div>
 					<p>Level: {$nftChar?.level || ''}</p>
-					<p class="text-[8px]">xp needed for next level:</p>
+					<p class="text-[8px]">xp needed for next level: {$requiredXP}</p>
 				</div>
 
 				<div class="pt-4">
@@ -106,12 +110,16 @@
 
 		<div class="space-y-6">
 			<div>
-				<p class="text-xs">XP points available: ###</p>
+				<p class="text-xs">XP points available: {$getXP || '0'}</p>
 				<button
 					on:click={(_) => levelUp()}
-					disabled={!$connected || $signerAddress != $nftChar?.owner}
+					disabled={!$connected ||
+						$signerAddress != $nftChar?.owner ||
+						Number($getXP) < Number($requiredXP)}
 					class={'border border-black bg-slate-200 hover:bg-slate-300 rounded-lg px-4 py-1 ' +
-						(!$connected || $signerAddress != $nftChar?.owner
+						(!$connected ||
+						$signerAddress != $nftChar?.owner ||
+						Number($getXP) < Number($requiredXP)
 							? ' text-gray-400 cursor-not-allowed border-gray-400 bg-slate-100 hover:bg-slate-100'
 							: '')}>Train</button
 				>

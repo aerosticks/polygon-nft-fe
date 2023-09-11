@@ -4,11 +4,11 @@ import { connected, signer, signerAddress } from 'svelte-ethers-store';
 import type { PolygonMumbaiSdk } from 'eth-sdk/build';
 
 const asyncGetCharacterNFT = async (sdk: PolygonMumbaiSdk, tokenId: number) => {
-	console.log('SDK INFO', sdk);
-	console.log('char stats token id search ', tokenId, sdk.CHAINBATTLES);
+	// console.log('SDK INFO', sdk);
+	// console.log('char stats token id search ', tokenId, sdk.CHAINBATTLES);
 	let nft = await sdk.CHAINBATTLES.getCharacterStats(tokenId);
 
-	console.log('CHAR STATS\n', nft);
+	// console.log('CHAR STATS\n', nft);
 	return nft;
 };
 
@@ -46,7 +46,7 @@ export const getTokenURI = (tokenId: number) =>
 
 const asyncAllGetTokenURI = async (sdk: PolygonMumbaiSdk, tokenIds: number[]) => {
 	let uris = [];
-	console.log('PASSED tokenIds ', tokenIds);
+	// console.log('PASSED tokenIds ', tokenIds);
 	for (let i = 0; i < tokenIds.length; i++) {
 		let uri = await sdk.CHAINBATTLES.tokenURI(tokenIds[i]);
 		uris.push(decodeJSON(uri));
@@ -89,4 +89,44 @@ export const trainNft = (tokenId: number) =>
 				set(res);
 			})
 			.catch((err) => console.error(err));
+	});
+
+const asyncGetXP = async (sdk: PolygonMumbaiSdk) => {
+	let xpResult = await sdk.CHAINBATTLES.getXP();
+
+	console.log('XP amount ', xpResult);
+	return xpResult.toNumber();
+};
+
+export const getXP = derived([sdk], ([$sdk], set) => {
+	if (!$sdk) return;
+	asyncGetXP($sdk)
+		.then((res) => {
+			console.log('XP res ', res);
+			set(res);
+		})
+		.catch((err) => {
+			console.error(err);
+		});
+});
+
+const asyncGetRequiredXP = async (sdk: PolygonMumbaiSdk, tokenId: number) => {
+	let requiredXP = await sdk.CHAINBATTLES.getAmountForNextLevel(Number(tokenId));
+
+	console.log('REQ XP ', requiredXP);
+
+	return requiredXP;
+};
+
+export const getRequiredXP = (tokenId: number) =>
+	derived([sdk], ([$sdk], set) => {
+		if (!$sdk) return;
+		asyncGetRequiredXP($sdk, tokenId)
+			.then((res) => {
+				console.log('XP required res ', res);
+				set(res);
+			})
+			.catch((err) => {
+				console.error(err);
+			});
 	});
