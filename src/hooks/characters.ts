@@ -2,6 +2,7 @@ import { sdk } from 'src/stores/eth-sdk';
 import { derived, get, type Readable } from 'svelte/store';
 import { connected, signer, signerAddress } from 'svelte-ethers-store';
 import type { PolygonMumbaiSdk } from 'eth-sdk/build';
+import { eventTrainTrigger, eventXPTrigger } from 'src/routes/nfts/store';
 
 const asyncGetCharacterNFT = async (sdk: PolygonMumbaiSdk, tokenId: number) => {
 	// console.log('SDK INFO', sdk);
@@ -98,8 +99,9 @@ const asyncGetXP = async (sdk: PolygonMumbaiSdk) => {
 	return xpResult.toNumber();
 };
 
-export const getXP = derived([sdk], ([$sdk], set) => {
+export const getXP = derived([sdk, eventXPTrigger], ([$sdk, $eventXPTrigger], set) => {
 	if (!$sdk) return;
+	console.log('fetch XP total');
 	asyncGetXP($sdk)
 		.then((res) => {
 			console.log('XP res ', res);
@@ -119,8 +121,9 @@ const asyncGetRequiredXP = async (sdk: PolygonMumbaiSdk, tokenId: number) => {
 };
 
 export const getRequiredXP = (tokenId: number) =>
-	derived([sdk], ([$sdk], set) => {
+	derived([sdk, eventTrainTrigger], ([$sdk, $eventTrainTrigger], set) => {
 		if (!$sdk) return;
+		console.log('fetch new xp required');
 		asyncGetRequiredXP($sdk, tokenId)
 			.then((res) => {
 				console.log('XP required res ', res);

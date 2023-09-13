@@ -10,6 +10,9 @@
 	import { mintCharEvents, type MintedEvents } from 'src/hooks/events';
 	import { getCharacterNFT, getTokenURI, getAllTokenURI } from 'src/hooks/characters';
 	import { sdk } from 'src/stores/eth-sdk';
+	import { onMount } from 'svelte';
+	import { eventMintTrigger } from 'src/routes/nfts/store';
+	import { EVENTS_CHAINBATTLES } from 'src/utils/single-provider';
 
 	// $: console.log('CONTRACT\n', $sdk.CHAINBATTLES);
 	$: console.log('MINT', $mintCharEvents);
@@ -39,6 +42,26 @@
 		let tokenIds = mintEvents.map((mint) => mint.tokenId);
 		return tokenIds;
 	}
+
+	onMount(() => {
+		if (!$sdk || !$sdk.CHAINBATTLES || !EVENTS_CHAINBATTLES) return;
+
+		// Define the event listener function
+		const handleMintEvent = (owner: string, tokenId: number) => {
+			const minting: MintedEvents = { owner, tokenId };
+			console.log('new MINT EVENT', minting);
+			eventMintTrigger.update((value) => !value);
+		};
+
+		let mintedFilters = EVENTS_CHAINBATTLES.filters.Minted();
+
+		EVENTS_CHAINBATTLES.on(mintedFilters, handleMintEvent);
+
+		return () => {
+			// Remove the event listener when the component is destroyed
+			EVENTS_CHAINBATTLES.off(mintedFilters, handleMintEvent);
+		};
+	});
 </script>
 
 <div>
@@ -50,7 +73,7 @@
 			class={'border border-black bg-slate-200 hover:bg-slate-300 px-2 py-1 ' +
 				(!$connected ? 'text-gray-400 cursor-not-allowed bg-slate-100 hover:bg-slate-100' : '')}
 			on:click={(_) => {
-				$sdk?.CHAINBATTLES?.connect($signer).mint();
+				let mint = $sdk?.CHAINBATTLES?.connect($signer).mint();
 			}}
 		>
 			Mint a new NFT
@@ -58,7 +81,7 @@
 	</div>
 
 	{#if $ownerURIs?.length}
-		<div class="flex justify-center space-x-3 m-6">
+		<div class="flex justify-center space-x-3 space-y-3 m-6 w-full flex-wrap">
 			{#each mintedEvents as mintEvent, index}
 				<div class="border border-black rounded-lg p-2 bg-slate-200 w-fit text-center">
 					<div class="w-48 h-48 m-4">

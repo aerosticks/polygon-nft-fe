@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { getCharacterNFT, getTokenURI, getAllTokenURI, getXP, getRequiredXP } from 'src/hooks/characters';
-    import { mintCharEvents, attackEvents, burnedEvents, trainedEvents, type MintedEvents } from 'src/hooks/events';
+    import { mintCharEvents, attackEvents, burnedEvents, trainedEvents, xpGainedEvents, type MintedEvents } from 'src/hooks/events';
     import {
 		chainId,
 		defaultEvmStores,
@@ -11,17 +11,21 @@
 		signerAddress
 	} from 'svelte-ethers-store';
     import { sdk } from 'src/stores/eth-sdk';
+	import { EVENTS_CHAINBATTLES } from 'src/utils/single-provider';
 
     import StrongIcon from `~icons/mdi/arm-flex`;
     import SpeedIcon from `~icons/mdi/rabbit`;
     import HealthIcon from `~icons/healthicons/health`;
 
     import EnemyDetails from 'src/routes/details/enemy.svelte';
+	import { onMount } from 'svelte';
+	import { eventTrainTrigger, eventAttackTrigger, eventBurnTrigger, eventXPTrigger } from 'src/routes/nfts/store';
 
     $: console.log('XP\n', $getXP)
 
 	// $: console.log('PAGE DATA', $page.params.slug);
     $: console.log('attacks', $attackEvents)
+	$: console.log('XP GAINED EVENTS', $xpGainedEvents)
 
 	$: nftURI = getTokenURI(Number($page?.params?.slug));
 	$: nftChar = getCharacterNFT(Number($page?.params?.slug));
@@ -60,6 +64,51 @@
         console.log('fight tokens', Number($nftChar?.id), Number(enemyTokenId))
         $sdk.CHAINBATTLES?.connect($signer).attack(Number($nftChar?.id), Number(enemyTokenId)).then(res => console.log('start fight', res)).catch(err => console.warn('error fighting', err));
     }
+
+	onMount(() => {
+		if(!$sdk || !$sdk.CHAINBATTLES || !EVENTS_CHAINBATTLES) return;
+
+		const handleLevelEvent = (tokenId: Number, newLevel: Number, remainingXP: Number) => {
+			const levelUp = {tokenId, newLevel, remainingXP};
+			console.log('new level up event', levelUp);
+			eventTrainTrigger.update(value => !value)
+		}
+
+		const handleFightEvent = (attackerTokenId: number, victimTokenId: number, damage: number) => {
+			const fighting = {attackerTokenId, victimTokenId, damage};
+			console.log('new fight event', fighting);
+			eventAttackTrigger.update(value => !value);
+		}
+
+		const handleXpEvent = (owner: string, xpPoints: number) => {
+			const gainXP = {owner, xpPoints};
+			console.log('new xp event', gainXP);
+			eventXPTrigger.update(value => !value);
+		}
+
+		const handleBurnEvent = (tokenId: number) => {
+			const burning = {tokenId};
+			console.log('new burn event', burning);
+			eventBurnTrigger.update(value => !value)
+		}
+
+		const levelFilter = EVENTS_CHAINBATTLES.filters.Trained();
+		const fightFilter = EVENTS_CHAINBATTLES.filters.Attacked();
+		const xpFilter = EVENTS_CHAINBATTLES.filters.XPgained();
+		const burnFilter = EVENTS_CHAINBATTLES.filters.Burned();
+
+		EVENTS_CHAINBATTLES.on(levelFilter, handleLevelEvent);
+		EVENTS_CHAINBATTLES.on(fightFilter, handleFightEvent);
+		EVENTS_CHAINBATTLES.on(xpFilter, handleXpEvent);
+		EVENTS_CHAINBATTLES.on(burnFilter, handleBurnEvent);
+
+		return () => {
+			EVENTS_CHAINBATTLES.off(levelFilter, handleLevelEvent);
+			EVENTS_CHAINBATTLES.off(fightFilter, handleFightEvent);
+			EVENTS_CHAINBATTLES.off(xpFilter, handleXpEvent);
+			EVENTS_CHAINBATTLES.off(burnFilter, handleBurnEvent);
+		}
+	})
 </script>
 
 <div>
@@ -110,7 +159,7 @@
 
 		<div class="space-y-6">
 			<div>
-				<p class="text-xs">XP points available: {$getXP || '0'}</p>
+				<p class="text-xs">XP points available: {$getXP}</p>
 				<button
 					on:click={(_) => levelUp()}
 					disabled={!$connected ||
@@ -143,7 +192,7 @@
 
 		<!-- <div>minted nfts not by this owner</div> -->
 		{#if $ownerURIs?.length}
-			<div class="flex justify-center space-x-3 m-6">
+			<div class="flex justify-center space-x-3 space-y-3 m-6 w-full flex-wrap">
 				{#each mintedEvents as mintEvent, index}
 					<div class="border border-black rounded-lg p-2 bg-slate-200 w-fit text-center">
 						<!-- <div class="w-48 h-48 m-4">
