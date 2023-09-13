@@ -15,7 +15,8 @@ export async function connectWallet(signerAddress: string) {
 export async function switchNetwork() {
 	await window?.ethereum.request({
 		method: 'wallet_switchEthereumChain',
-		params: [{ chainId: '0x80001' }]
+		// params: [{ chainId: '0x80001' }]
+		params: [{ chainId: '0x13881' }]
 	});
 }
 

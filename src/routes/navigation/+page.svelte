@@ -8,7 +8,9 @@
 		signer,
 		signerAddress
 	} from 'svelte-ethers-store';
-	import { connectWallet } from 'src/utils/wallet';
+	import { connectWallet, switchNetwork } from 'src/utils/wallet';
+
+	$: console.log('CHAIN ID', $chainId);
 </script>
 
 <div class="py-4 flex items-center justify-between">
@@ -30,6 +32,14 @@
 			class:text-base-100={!$page.route?.id?.startsWith('/nfts')}
 			class:tab-active={$page.route?.id?.startsWith('/nfts')}>NFTs</a
 		>
+		<a
+			href="/faucet"
+			class="!border-primary tab text-black"
+			class:font-bold={$page.route?.id?.startsWith('/faucet')}
+			class:!text-primary={$page.route?.id?.startsWith('/faucet')}
+			class:text-base-100={!$page.route?.id?.startsWith('/faucet')}
+			class:tab-active={$page.route?.id?.startsWith('/faucet')}>Faucet</a
+		>
 	</div>
 	<div>
 		<button
@@ -46,6 +56,13 @@
 			on:click={(_) => {
 				connectWallet($signerAddress);
 			}}>Connect</button
+		>
+		<button
+			class={'border p-2 rounded-lg hover:bg-slate-300 bg-slate-200 ' +
+				($chainId == 80001 || !$connected ? 'hidden ' : ' ')}
+			on:click={(_) => {
+				switchNetwork();
+			}}>Switch to Mumbai</button
 		>
 	</div>
 </div>
