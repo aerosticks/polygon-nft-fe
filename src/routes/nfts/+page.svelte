@@ -24,7 +24,8 @@
 	// $: nftURI = getTokenURI(1);
 
 	// $: mintedEvents = $mintCharEvents || [];
-	$: mintedEvents = $connected ? sortByOwner($mintCharEvents || []) : $mintCharEvents || [];
+	$: mintedEvents =
+		$connected && $signerAddress ? sortByOwner($mintCharEvents || []) : $mintCharEvents || [];
 	$: console.log('MINTED by Owner ', mintedEvents || []);
 
 	$: ownerTokenIds = filterOwnerTokenIds($mintCharEvents || []);
@@ -81,12 +82,16 @@
 	</div>
 
 	{#if $ownerURIs?.length}
-		<div class="flex justify-center space-x-3 space-y-3 m-6 w-full flex-wrap">
+		<div class="flex justify-center space-x-3 m-6 w-full flex-wrap">
 			{#each mintedEvents as mintEvent, index}
-				<div class="border border-black rounded-lg p-2 bg-slate-200 w-fit text-center">
+				<div class="border border-black rounded-lg p-2 bg-slate-200 w-fit text-center my-2">
 					<div class="w-48 h-48 m-4">
 						<a href={'/details/' + mintEvent.tokenId}>
-							<img class="rounded-lg" src={$ownerURIs[index]?.image || ''} alt="SVG" />
+							<img
+								class="rounded-lg"
+								src={$ownerURIs[mintEvent.tokenId - 1]?.image || ''}
+								alt="SVG"
+							/>
 						</a>
 					</div>
 					<p class="text-xs">

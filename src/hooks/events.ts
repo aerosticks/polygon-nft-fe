@@ -74,7 +74,8 @@ const asyncAttackEvents = async (sdk: PolygonMumbaiSdk) => {
 export type AttackedEvents = {
 	attacker: number;
 	victim: number;
-	damage: number;
+	attackDamage: number;
+	defenderDamage: number;
 };
 
 export const attackEvents: Readable<AttackedEvents[]> = derived(
@@ -100,7 +101,8 @@ async function decodeAttackedEvents(attackEvents) {
 		const attack = {
 			attacker: attackEvents[i].args.attackerTokenId.toNumber(),
 			victim: attackEvents[i].args.victimTokenId.toNumber(),
-			damage: attackEvents[i].args.damage.toNumber()
+			attackDamage: attackEvents[i].args.attackDamage.toNumber(),
+			defenderDamage: attackEvents[i].args.defenseDamage.toNumber()
 		};
 		attacks.push(attack);
 	}

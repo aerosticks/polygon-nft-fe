@@ -21,7 +21,11 @@
 	import { onMount } from 'svelte';
 	import { eventTrainTrigger, eventAttackTrigger, eventBurnTrigger, eventXPTrigger } from 'src/routes/nfts/store';
 
+
+	$: console.log('SDK', $sdk)
     $: console.log('XP\n', $getXP)
+
+	// $: userXP = getXP(signerAddress);
 
 	// $: console.log('PAGE DATA', $page.params.slug);
     $: console.log('attacks', $attackEvents)
@@ -56,7 +60,8 @@
 
     function levelUp() {
         // enough xp to train to next level
-        $sdk?.CHAINBATTLES?.connect($signer).train($nftChar?.id).then(res => console.log('train token ', res)).catch(err => console.warn('issue training',err));
+		console.log('TRAIN TOKEN ID ', Number($nftChar?.id))
+        $sdk.CHAINBATTLES?.connect($signer).train(Number($nftChar?.id)).then(res => console.log('train token ', res)).catch(err => console.warn('issue training',err));
     }
 
     function fightNft(enemyTokenId: number) {
@@ -192,9 +197,9 @@
 
 		<!-- <div>minted nfts not by this owner</div> -->
 		{#if $ownerURIs?.length}
-			<div class="flex justify-center space-x-3 space-y-3 m-6 w-full flex-wrap">
+			<div class="flex justify-center space-x-3 m-6 w-full flex-wrap">
 				{#each mintedEvents as mintEvent, index}
-					<div class="border border-black rounded-lg p-2 bg-slate-200 w-fit text-center">
+					<div class="border border-black rounded-lg p-2 bg-slate-200 w-fit text-center my-2">
 						<!-- <div class="w-48 h-48 m-4">
 							<img class="rounded-lg" src={$ownerURIs[index]?.image || ''} alt="SVG" />
 						</div> -->

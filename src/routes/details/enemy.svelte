@@ -55,7 +55,7 @@
 		{:else}
 			<p>Battle Report</p>
 			{#each item?.content as attack}
-				<p class="text-xs">NFT #{attack.attacker} does {attack.damage} damage!</p>
+				<p class="text-xs">NFT #{attack.attacker} does {attack.attackDamage} damage!</p>
 			{/each}
 		{/if}
 	</div>

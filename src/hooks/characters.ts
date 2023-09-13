@@ -2,7 +2,7 @@ import { sdk } from 'src/stores/eth-sdk';
 import { derived, get, type Readable } from 'svelte/store';
 import { connected, signer, signerAddress } from 'svelte-ethers-store';
 import type { PolygonMumbaiSdk } from 'eth-sdk/build';
-import { eventTrainTrigger, eventXPTrigger } from 'src/routes/nfts/store';
+import { eventAttackTrigger, eventTrainTrigger, eventXPTrigger } from 'src/routes/nfts/store';
 
 const asyncGetCharacterNFT = async (sdk: PolygonMumbaiSdk, tokenId: number) => {
 	// console.log('SDK INFO', sdk);
@@ -14,14 +14,17 @@ const asyncGetCharacterNFT = async (sdk: PolygonMumbaiSdk, tokenId: number) => {
 };
 
 export const getCharacterNFT = (tokenId: number) =>
-	derived([sdk], ([$sdk], set) => {
-		if (!$sdk) return;
-		asyncGetCharacterNFT($sdk, tokenId)
-			.then((res) => {
-				set(res);
-			})
-			.catch((err) => console.warn(err));
-	});
+	derived(
+		[sdk, eventTrainTrigger, eventAttackTrigger],
+		([$sdk, $eventXPTrigger, $eventAttackTrigger], set) => {
+			if (!$sdk) return;
+			asyncGetCharacterNFT($sdk, tokenId)
+				.then((res) => {
+					set(res);
+				})
+				.catch((err) => console.warn(err));
+		}
+	);
 
 const asyncGetTokenURI = async (sdk: PolygonMumbaiSdk, tokenId: number) => {
 	let uri = await sdk.CHAINBATTLES.tokenURI(tokenId);
@@ -92,25 +95,28 @@ export const trainNft = (tokenId: number) =>
 			.catch((err) => console.error(err));
 	});
 
-const asyncGetXP = async (sdk: PolygonMumbaiSdk) => {
-	let xpResult = await sdk.CHAINBATTLES.getXP();
+const asyncGetXP = async (sdk: PolygonMumbaiSdk, userAddress: string) => {
+	let xpResult = await sdk.CHAINBATTLES.getXP(userAddress);
 
 	console.log('XP amount ', xpResult);
 	return xpResult.toNumber();
 };
 
-export const getXP = derived([sdk, eventXPTrigger], ([$sdk, $eventXPTrigger], set) => {
-	if (!$sdk) return;
-	console.log('fetch XP total');
-	asyncGetXP($sdk)
-		.then((res) => {
-			console.log('XP res ', res);
-			set(res);
-		})
-		.catch((err) => {
-			console.error(err);
-		});
-});
+export const getXP = derived(
+	[sdk, signerAddress, eventXPTrigger],
+	([$sdk, $signerAddress, $eventXPTrigger], set) => {
+		if (!$sdk) return;
+		console.log('fetch XP total');
+		asyncGetXP($sdk, $signerAddress)
+			.then((res) => {
+				console.log('XP res ', res);
+				set(res);
+			})
+			.catch((err) => {
+				console.error(err);
+			});
+	}
+);
 
 const asyncGetRequiredXP = async (sdk: PolygonMumbaiSdk, tokenId: number) => {
 	let requiredXP = await sdk.CHAINBATTLES.getAmountForNextLevel(Number(tokenId));
