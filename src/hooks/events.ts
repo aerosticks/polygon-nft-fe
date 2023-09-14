@@ -7,7 +7,10 @@ import {
 	eventTrainTrigger,
 	eventAttackTrigger,
 	eventBurnTrigger,
-	eventXPTrigger
+	eventXPTrigger,
+	eventHealTrigger,
+	eventReviveTrigger,
+	eventKilledTrigger
 } from 'src/routes/nfts/store';
 
 const asyncMintCharEvents = async (sdk: PolygonMumbaiSdk) => {
@@ -222,11 +225,123 @@ async function decodeXPEvents(trainEvents) {
 	let trains = [];
 	for (let i = 0; i < trainEvents.length; i++) {
 		const train = {
-			owner: trainEvents[i].args.owner,
+			owner: trainEvents[i].args.owner.toString(),
 			xpPoints: trainEvents[i].arg.xpPoints.toNumber()
 		};
 		trains.push(train);
 	}
 
 	return trains;
+}
+
+const asyncHealEvents = async (sdk: PolygonMumbaiSdk) => {
+	let events = await sdk.CHAINBATTLES.queryFilter('Healed', 39851776, 'latest');
+
+	const filteredInfo = await decodeHealEvents(events);
+
+	console.log('heal events', events);
+
+	return filteredInfo;
+};
+
+export const healEvents = derived([sdk, eventHealTrigger], ([$sdk, $eventHealTrigger], set) => {
+	if (!$sdk) return;
+	console.log('fetch heal events');
+	asyncHealEvents($sdk)
+		.then((res) => {
+			set(res);
+		})
+		.catch((err) => {
+			console.warn(err);
+		});
+});
+
+async function decodeHealEvents(healEvents) {
+	// console.log('decode events\n', mintEvents);
+	let heals = [];
+	for (let i = 0; i < healEvents.length; i++) {
+		const heal = {
+			tokenId: healEvents[i].args.tokenId.toNumber(),
+			healAmount: healEvents[i].arg.healAmount.toNumber()
+		};
+		heals.push(heal);
+	}
+
+	return heals;
+}
+
+const asyncReviveEvents = async (sdk: PolygonMumbaiSdk) => {
+	let events = await sdk.CHAINBATTLES.queryFilter('Revived', 39851776, 'latest');
+
+	const filteredInfo = await decodeReviveEvents(events);
+
+	console.log('revive events', events);
+
+	return filteredInfo;
+};
+
+export const revivedEvents = derived(
+	[sdk, eventReviveTrigger],
+	([$sdk, $eventReviveTrigger], set) => {
+		if (!$sdk) return;
+		console.log('fetch revive event');
+		asyncReviveEvents($sdk)
+			.then((res) => {
+				set(res);
+			})
+			.catch((err) => {
+				console.warn(err);
+			});
+	}
+);
+
+async function decodeReviveEvents(reviveEvents) {
+	// console.log('decode events\n', mintEvents);
+	let revives = [];
+	for (let i = 0; i < reviveEvents.length; i++) {
+		const revive = {
+			tokenId: reviveEvents[i].args.tokenId.toNumber()
+		};
+		revives.push(revive);
+	}
+
+	return revives;
+}
+
+const asyncKilledEvents = async (sdk: PolygonMumbaiSdk) => {
+	let events = await sdk.CHAINBATTLES.queryFilter('Killed', 39851776, 'latest');
+
+	const filteredInfo = await decodeKilledEvents(events);
+
+	console.log('killed events', events);
+
+	return filteredInfo;
+};
+
+export const killedEvents = derived(
+	[sdk, eventKilledTrigger],
+	([$sdk, $eventKilledTrigger], set) => {
+		if (!$sdk) return;
+		asyncKilledEvents($sdk)
+			.then((res) => {
+				set(res);
+			})
+			.catch((err) => {
+				console.warn(err);
+			});
+	}
+);
+
+async function decodeKilledEvents(killEvents) {
+	// console.log('decode events\n', mintEvents);
+	let kills = [];
+	for (let i = 0; i < killEvents.length; i++) {
+		const kill = {
+			owner: killEvents[i].args.owner.toString(),
+			tokenId: killEvents[i].args.tokenId.toNumber()
+		};
+		kills.push(kill);
+	}
+
+	return kills;
 }

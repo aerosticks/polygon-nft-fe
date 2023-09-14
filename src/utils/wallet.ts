@@ -26,7 +26,7 @@ export async function addMumbaiNetwork() {
 			method: 'wallet_addEthereumChain',
 			params: [
 				{
-					chainId: '0x80001',
+					chainId: '0x13881',
 					// chainId: utils.hexValue(80001),
 					chainName: 'Mumbai Testnet',
 					nativeCurrency: {

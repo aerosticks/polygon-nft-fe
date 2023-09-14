@@ -2,7 +2,14 @@ import { sdk } from 'src/stores/eth-sdk';
 import { derived, get, type Readable } from 'svelte/store';
 import { connected, signer, signerAddress } from 'svelte-ethers-store';
 import type { PolygonMumbaiSdk } from 'eth-sdk/build';
-import { eventAttackTrigger, eventTrainTrigger, eventXPTrigger } from 'src/routes/nfts/store';
+import {
+	eventAttackTrigger,
+	eventTrainTrigger,
+	eventXPTrigger,
+	eventHealTrigger,
+	eventReviveTrigger,
+	eventKilledTrigger
+} from 'src/routes/nfts/store';
 
 const asyncGetCharacterNFT = async (sdk: PolygonMumbaiSdk, tokenId: number) => {
 	// console.log('SDK INFO', sdk);
@@ -15,8 +22,8 @@ const asyncGetCharacterNFT = async (sdk: PolygonMumbaiSdk, tokenId: number) => {
 
 export const getCharacterNFT = (tokenId: number) =>
 	derived(
-		[sdk, eventTrainTrigger, eventAttackTrigger],
-		([$sdk, $eventXPTrigger, $eventAttackTrigger], set) => {
+		[sdk, eventTrainTrigger, eventAttackTrigger, eventHealTrigger, eventReviveTrigger],
+		([$sdk, $eventXPTrigger, $eventAttackTrigger, $eventHealTrigger, $eventReviveTrigger], set) => {
 			if (!$sdk) return;
 			asyncGetCharacterNFT($sdk, tokenId)
 				.then((res) => {
@@ -38,15 +45,18 @@ export type NFTURI = {
 };
 
 export const getTokenURI = (tokenId: number) =>
-	derived([sdk], ([$sdk], set) => {
-		if (!$sdk) return;
-		asyncGetTokenURI($sdk, tokenId)
-			.then((res) => {
-				// console.log('JSON URI\n', JSON.parse(res));
-				set(res);
-			})
-			.catch((err) => console.warn(err));
-	});
+	derived(
+		[sdk, eventAttackTrigger, eventHealTrigger, eventReviveTrigger],
+		([$sdk, $eventAttackTrigger, $eventHealTrigger, $eventReviveTrigger], set) => {
+			if (!$sdk) return;
+			asyncGetTokenURI($sdk, tokenId)
+				.then((res) => {
+					// console.log('JSON URI\n', JSON.parse(res));
+					set(res);
+				})
+				.catch((err) => console.warn(err));
+		}
+	);
 
 const asyncAllGetTokenURI = async (sdk: PolygonMumbaiSdk, tokenIds: number[]) => {
 	let uris = [];
@@ -103,8 +113,8 @@ const asyncGetXP = async (sdk: PolygonMumbaiSdk, userAddress: string) => {
 };
 
 export const getXP = derived(
-	[sdk, signerAddress, eventXPTrigger],
-	([$sdk, $signerAddress, $eventXPTrigger], set) => {
+	[sdk, signerAddress, eventXPTrigger, eventAttackTrigger],
+	([$sdk, $signerAddress, $eventXPTrigger, $eventAttackTrigger], set) => {
 		if (!$sdk) return;
 		console.log('fetch XP total');
 		asyncGetXP($sdk, $signerAddress)
@@ -137,5 +147,45 @@ export const getRequiredXP = (tokenId: number) =>
 			})
 			.catch((err) => {
 				console.error(err);
+			});
+	});
+
+const asyncHealToken = async (sdk: PolygonMumbaiSdk, tokenId: number) => {
+	let healToken = await sdk.CHAINBATTLES.heal(tokenId);
+
+	console.log('healed token', healToken);
+
+	return healToken;
+};
+
+export const healToken = (tokenId: number) =>
+	derived([sdk], ([$sdk], set) => {
+		if (!$sdk) return;
+		asyncHealToken($sdk, tokenId)
+			.then((res) => {
+				set(res);
+			})
+			.catch((err) => {
+				console.warn(err);
+			});
+	});
+
+const asyncReviveToken = async (sdk: PolygonMumbaiSdk, tokenId: number) => {
+	let reviveToken = await sdk.CHAINBATTLES.revive(tokenId);
+
+	console.log('revived token', reviveToken);
+
+	return reviveToken;
+};
+
+export const reviveToken = (tokenId: number) =>
+	derived([sdk], ([$sdk], set) => {
+		if (!$sdk) return;
+		asyncReviveToken($sdk, tokenId)
+			.then((res) => {
+				set(res);
+			})
+			.catch((err) => {
+				console.warn(err);
 			});
 	});

@@ -20,6 +20,7 @@
     import EnemyDetails from 'src/routes/details/enemy.svelte';
 	import { onMount } from 'svelte';
 	import { eventTrainTrigger, eventAttackTrigger, eventBurnTrigger, eventXPTrigger } from 'src/routes/nfts/store';
+	import { goto } from '$app/navigation';
 
 
 	$: console.log('SDK', $sdk)
@@ -69,6 +70,11 @@
         console.log('fight tokens', Number($nftChar?.id), Number(enemyTokenId))
         $sdk.CHAINBATTLES?.connect($signer).attack(Number($nftChar?.id), Number(enemyTokenId)).then(res => console.log('start fight', res)).catch(err => console.warn('error fighting', err));
     }
+
+	function startFight(enemyTokenId: number) {
+		console.log('go to page to start fight')
+		goto(`/fight/${$nftChar?.id}/${enemyTokenId}`)
+	}
 
 	onMount(() => {
 		if(!$sdk || !$sdk.CHAINBATTLES || !EVENTS_CHAINBATTLES) return;
@@ -216,13 +222,23 @@
 							</a>
 						</p>
 						<div class="my-2">
-							<button
-								on:click={(_) => fightNft(mintEvent.tokenId)}
+							<!-- <button
+								on:click={(_) => {
+									// fightNft(mintEvent.tokenId);
+									startFight(mintEvent.tokenId);
+								}}
 								disabled={!$connected || $signerAddress == mintEvent.owner}
 								class={'border border-black rounded-lg px-2 py-1 bg-slate-200 hover:bg-slate-300 ' +
 									(!$connected || $signerAddress == mintEvent.owner
 										? ' text-gray-400 cursor-not-allowed border-gray-400 bg-slate-100 hover:bg-slate-100'
 										: '')}>Fight</button
+							> -->
+							<a
+								href={`/fight/${$nftChar?.id}/${mintEvent.tokenId}`}
+								class={'border border-black rounded-lg px-2 py-1 bg-slate-200 hover:bg-slate-300  text-black ' +
+									(!$connected || $signerAddress == mintEvent.owner
+										? ' text-gray-400 cursor-not-allowed border-gray-400 bg-slate-100 hover:bg-slate-100'
+										: '')}>Fight</a
 							>
 						</div>
 					</div>
