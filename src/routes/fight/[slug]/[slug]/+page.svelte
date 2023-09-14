@@ -52,6 +52,7 @@
 	$: fightingTokenIds = extractNumbersFromString($page?.url?.pathname);
 
 	$: userCharStats = getCharacterNFT(Number(fightingTokenIds[0]));
+	$: enemyCharStats = getCharacterNFT(Number(fightingTokenIds[1]));
 	$: userNftChar = getTokenURI(Number(fightingTokenIds[0]));
 	$: enemyNftChar = getTokenURI(Number(fightingTokenIds[1]));
 
@@ -149,17 +150,26 @@
 
 	<div class="flex items-center justify-between px-10">
 		<div class="pt-40">
+			<div>
+				<p>Damage Dealt:</p>
+				<p>XP Gained:</p>
+				<p>Damage Taken:</p>
+			</div>
 			<img class="rounded-lg w-80" src={$userNftChar?.image || ''} alt="SVG" />
+			<div>
+				<p>Total XP:</p>
+			</div>
 			<div class="space-x-2 py-2 flex items-center justify-center">
 				<button
-					disabled={$userCharStats?.alive == false || $enemyNftChar?.alive == false}
+					disabled={$userCharStats?.alive == false || $enemyCharStats?.alive == false}
 					on:click={(_) => {
-						if ($userCharStats?.alive == false || $enemyNftChar?.alive == false) {
+						console.log('ALIVE STATES', $userCharStats?.alive, $enemyCharStats?.alive);
+						if ($userCharStats?.alive == true && $enemyCharStats?.alive == true) {
 							fightNft();
 						}
 					}}
 					class={'border  rounded-lg  px-2 py-1 ' +
-						($userCharStats?.alive == false || $enemyNftChar?.alive == false
+						($userCharStats?.alive == false || $enemyCharStats?.alive == false
 							? 'bg-slate-100 hover:bg-slate-100 text-slate-300 border-slate-300'
 							: 'border-black bg-slate-200 hover:bg-slate-300')}>Attack</button
 				>
@@ -173,7 +183,7 @@
 					class={'border  rounded-lg px-2 py-1 ' +
 						($userCharStats?.life.toNumber() == 100 && $userCharStats?.alive == false
 							? 'bg-slate-100 hover:bg-slate-100 text-slate-300 border-slate-300'
-							: 'bg-slate-200 hover:bg-slate-300 border-black')}>Heal</button
+							: 'bg-slate-200 hover:bg-slate-300 border-black')}>Heal (65xp)</button
 				>
 				<button
 					disabled={$userCharStats?.life.toNumber() == 0 &&
@@ -193,13 +203,19 @@
 						$userCharStats?.level.toNumber() == 0 &&
 						$userCharStats?.alive == true
 							? 'bg-slate-200 hover:bg-slate-300 border-black'
-							: ' bg-slate-100 hover:bg-slate-100 text-slate-300 border-slate-300')}>Revive</button
+							: ' bg-slate-100 hover:bg-slate-100 text-slate-300 border-slate-300')}
+					>Revive (100xp)</button
 				>
 			</div>
 		</div>
 		<div><p class="text-3xl">VS</p></div>
 		<div>
 			<img class="rounded-lg w-80" src={$enemyNftChar?.image || ''} alt="SVG" />
+			<div>
+				<p>Damage Dealt:</p>
+				<p>XP Gained:</p>
+				<p>Damage Taken:</p>
+			</div>
 		</div>
 	</div>
 </div>
