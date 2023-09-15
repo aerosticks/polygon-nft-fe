@@ -10,7 +10,11 @@ import {
 	eventXPTrigger,
 	eventHealTrigger,
 	eventReviveTrigger,
-	eventKilledTrigger
+	eventKilledTrigger,
+	attackAnimation,
+	healAnimation,
+	reviveAnimation,
+	xpAnimation
 } from 'src/routes/nfts/store';
 
 const asyncMintCharEvents = async (sdk: PolygonMumbaiSdk) => {
@@ -90,6 +94,7 @@ export const attackEvents: Readable<AttackedEvents[]> = derived(
 			.then((res) => {
 				// console.log('attack events res', res);
 				set(res);
+				xpAnimation.update((value) => (value = true));
 			})
 			.catch((err) => {
 				console.error('error with attack events', err);
