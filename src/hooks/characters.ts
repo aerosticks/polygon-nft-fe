@@ -8,7 +8,8 @@ import {
 	eventXPTrigger,
 	eventHealTrigger,
 	eventReviveTrigger,
-	eventKilledTrigger
+	eventKilledTrigger,
+	eventMintTrigger
 } from 'src/routes/nfts/store';
 
 const asyncGetCharacterNFT = async (sdk: PolygonMumbaiSdk, tokenId: number) => {
@@ -70,8 +71,9 @@ const asyncAllGetTokenURI = async (sdk: PolygonMumbaiSdk, tokenIds: number[]) =>
 };
 
 export const getAllTokenURI = (tokenIds: number[]) =>
-	derived([sdk], ([$sdk], set) => {
+	derived([sdk, eventMintTrigger], ([$sdk, $eventMintTrigger], set) => {
 		if (!$sdk) return;
+		console.log('get uris after events');
 		asyncAllGetTokenURI($sdk, tokenIds)
 			.then((res) => {
 				// console.log('JSON URI\n', JSON.parse(res));
@@ -113,8 +115,8 @@ const asyncGetXP = async (sdk: PolygonMumbaiSdk, userAddress: string) => {
 };
 
 export const getXP = derived(
-	[sdk, signerAddress, eventXPTrigger, eventAttackTrigger],
-	([$sdk, $signerAddress, $eventXPTrigger, $eventAttackTrigger], set) => {
+	[sdk, signerAddress, eventXPTrigger, eventAttackTrigger, eventTrainTrigger],
+	([$sdk, $signerAddress, $eventXPTrigger, $eventAttackTrigger, $eventTrainTrigger], set) => {
 		if (!$sdk) return;
 		console.log('fetch XP total');
 		asyncGetXP($sdk, $signerAddress)

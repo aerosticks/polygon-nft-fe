@@ -46,6 +46,7 @@
 	import { tweened } from 'svelte/motion';
 	import { spring } from 'svelte/motion';
 	import { cubicIn, cubicOut } from 'svelte/easing';
+	import { broadcastTransaction, resolvedTransactions } from 'src/stores/transactions';
 
 	import SwordIcon from `~icons/game-icons/pointy-sword`;
 	import DamageIcon from '~icons/mdi/sword-cross';
@@ -110,17 +111,21 @@
 		setTimeout(() => {
 				positionXdamage.set(0);
 				positionYdamage.set(100)
+			
 				// xpAnimation.update(value => value = false)
 				 xpAnimation.update(value => value = false)
 
 		}, 4000)
 	}
-	afterUpdate(() => {
-    if ($xpAnimation == true) {
-      toggleDamageAnimation();
-	 
-    }
-  });
+	// afterUpdate(() => {
+	// 	if($resolvedTransactions.length && $resolvedTransactions[0].status != 'Failed') {
+	// 		console.log('showing damage')
+	// 		if ($xpAnimation == true) {
+	// 		toggleDamageAnimation();
+			
+	// 		}
+	// 	}
+	// });
 
 	let isFadingOut = false;
 
@@ -158,7 +163,7 @@
 		toggleOpacityEvery1Second();
 		toggleAnimation();
 		toggleAnimationEnemy();
-		toggleDamageAnimation();
+		// toggleDamageAnimation();
 	});
 
 	$: latestAttackEvents = $attackEvents;
@@ -175,98 +180,113 @@
 
 	function fightNft() {
 		console.log('fight tokens', Number(fightingTokenIds[0]), Number(fightingTokenIds[1]));
+		broadcastTransaction(
+			'Fighting',
 		$sdk.CHAINBATTLES?.connect($signer)
 			.attack(Number(fightingTokenIds[0]), Number(fightingTokenIds[1]))
-			.then((res) => {
-				console.log('start fight', res);
-				attackAnimation.update((value) => (value = true));
-			})
-			.catch((err) => console.warn('error fighting', err));
+		)
+		.then((res) => {
+					console.log('start fight', res);
+					eventAttackTrigger.update((value) => !value);
+					attackAnimation.update((value) => (value = true))
+					
+				})
+				.catch((err) => console.warn('error fighting', err))
 	}
 
 	function healNft() {
 		console.log('healing token ', Number(fightingTokenIds[0]));
-		$sdk.CHAINBATTLES?.connect($signer)
-			.heal(Number(fightingTokenIds[0]))
-			.then((res) => {
-				console.log('start healing ', res);
-				healAnimation.update((value) => (value = true));
-			})
-			.catch((err) => {
-				console.warn('error healing ', err);
-			});
+		broadcastTransaction(
+			'Healing',
+
+			$sdk.CHAINBATTLES?.connect($signer)
+				.heal(Number(fightingTokenIds[0]))
+				
+		).then((res) => {
+					console.log('start healing ', res);
+					eventHealTrigger.update(value => !value);
+					healAnimation.update((value) => (value = true));
+				})
+				.catch((err) => {
+					console.warn('error healing ', err);
+				});
 	}
 
 	function reviveNft() {
 		console.log('reviving token ', Number(fightingTokenIds[0]));
-		$sdk.CHAINBATTLES.connect($signer)
-			.revive(Number(fightingTokenIds[0]))
-			.then((res) => {
-				console.log('start reviving ', res);
-				reviveAnimation.update((value) => (value = true));
-			})
-			.catch((err) => {
-				console.warn('error reviving ', err);
-			});
+		broadcastTransaction(
+			'Reviving',
+
+			$sdk.CHAINBATTLES.connect($signer)
+				.revive(Number(fightingTokenIds[0]))
+				
+		).then((res) => {
+					console.log('start reviving ', res);
+					eventReviveTrigger.update(value => !value);
+					reviveAnimation.update((value) => (value = true));
+				})
+				.catch((err) => {
+					console.warn('error reviving ', err);
+				});
 	}
 
-	onMount(() => {
-		if (!$sdk || !$sdk.CHAINBATTLES || !EVENTS_CHAINBATTLES) return;
+	// onMount(() => {
+	// 	if (!$sdk || !$sdk.CHAINBATTLES || !EVENTS_CHAINBATTLES) return;
 
-		const handleFightEvent = (attackerTokenId: number, victimTokenId: number, damage: number) => {
-			const fighting = { attackerTokenId, victimTokenId, damage };
-			console.log('new fight event', fighting);
-			eventAttackTrigger.update((value) => !value);
-			attackAnimation.update((value) => (value = false));
-		};
+	// 	const handleFightEvent = (attackerTokenId: number, victimTokenId: number, damage: number) => {
+	// 		const fighting = { attackerTokenId, victimTokenId, damage };
+	// 		console.log('new fight event', fighting);
+	// 		eventAttackTrigger.update((value) => !value);
+	// 		attackAnimation.update((value) => (value = false));
+	// 	};
 
-		const handleXpEvent = (owner: string, xpPoints: number) => {
-			const gainXP = { owner, xpPoints };
-			console.log('new xp event', gainXP);
-			eventXPTrigger.update((value) => !value);
-			xpAnimation.update((value) => (value = false));
-		};
+	// 	const handleXpEvent = (owner: string, xpPoints: number) => {
+	// 		const gainXP = { owner, xpPoints };
+	// 		console.log('new xp event', gainXP);
+	// 		eventXPTrigger.update((value) => !value);
+	// 		xpAnimation.update((value) => (value = false));
+	// 	};
 
-		const handleHealEvent = (tokenId: number, healAmount: number) => {
-			const healing = { tokenId, healAmount };
-			console.log('new heal event', healing);
-			eventHealTrigger.update((value) => !value);
-			healAnimation.update((value) => (value = false));
-		};
+	// 	const handleHealEvent = (tokenId: number, healAmount: number) => {
+	// 		const healing = { tokenId, healAmount };
+	// 		console.log('new heal event', healing);
+	// 		eventHealTrigger.update((value) => !value);
+	// 		healAnimation.update((value) => (value = false));
+	// 	};
 
-		const handleReviveEvent = (tokenId: number) => {
-			const reviving = { tokenId };
-			console.log('new revive event', reviving);
-			eventReviveTrigger.update((value) => !value);
-			reviveAnimation.update((value) => (value = false));
-		};
+	// 	const handleReviveEvent = (tokenId: number) => {
+	// 		const reviving = { tokenId };
+	// 		console.log('new revive event', reviving);
+	// 		eventReviveTrigger.update((value) => !value);
+	// 		reviveAnimation.update((value) => (value = false));
+	// 	};
 
-		const handleKilledEvent = (owner: string, tokenId: number) => {
-			const killed = { owner, tokenId };
-			console.log('new killed event', killed);
-			eventKilledTrigger.update((value) => !value);
-		};
+	// 	const handleKilledEvent = (owner: string, tokenId: number) => {
+	// 		const killed = { owner, tokenId };
+	// 		console.log('new killed event', killed);
+	// 		eventKilledTrigger.update((value) => !value);
+	// 	};
 
-		const fightFilter = EVENTS_CHAINBATTLES.filters.Attacked();
-		const xpFilter = EVENTS_CHAINBATTLES.filters.XPgained();
-		const healFilter = EVENTS_CHAINBATTLES.filters.Healed();
-		const reviveFilter = EVENTS_CHAINBATTLES.filters.Revived();
-		const killedFilter = EVENTS_CHAINBATTLES.filters.Killed();
+	// 	const fightFilter = EVENTS_CHAINBATTLES.filters.Attacked();
+	// 	const xpFilter = EVENTS_CHAINBATTLES.filters.XPgained();
+	// 	const healFilter = EVENTS_CHAINBATTLES.filters.Healed();
+	// 	const reviveFilter = EVENTS_CHAINBATTLES.filters.Revived();
+	// 	const killedFilter = EVENTS_CHAINBATTLES.filters.Killed();
 
-		EVENTS_CHAINBATTLES.on(fightFilter, handleFightEvent);
-		EVENTS_CHAINBATTLES.on(xpFilter, handleXpEvent);
-		EVENTS_CHAINBATTLES.on(healFilter, handleHealEvent);
-		EVENTS_CHAINBATTLES.on(reviveFilter, handleReviveEvent);
-		EVENTS_CHAINBATTLES.on(killedFilter, handleKilledEvent);
+	// 	EVENTS_CHAINBATTLES.addListener(fightFilter, handleFightEvent);
+	// 	EVENTS_CHAINBATTLES.on(xpFilter, handleXpEvent);
+	// 	EVENTS_CHAINBATTLES.on(healFilter, handleHealEvent);
+	// 	EVENTS_CHAINBATTLES.on(reviveFilter, handleReviveEvent);
+	// 	EVENTS_CHAINBATTLES.on(killedFilter, handleKilledEvent);
 
-		return () => {
-			EVENTS_CHAINBATTLES.off(fightFilter, handleFightEvent);
-			EVENTS_CHAINBATTLES.off(xpFilter, handleXpEvent);
-			EVENTS_CHAINBATTLES.off(healFilter, handleHealEvent);
-			EVENTS_CHAINBATTLES.off(reviveFilter, handleReviveEvent);
-			EVENTS_CHAINBATTLES.on(killedFilter, handleKilledEvent);
-		};
-	});
+	// 	return () => {
+	// 		EVENTS_CHAINBATTLES.off(fightFilter, handleFightEvent);
+	// 		EVENTS_CHAINBATTLES.off(xpFilter, handleXpEvent);
+	// 		EVENTS_CHAINBATTLES.off(healFilter, handleHealEvent);
+	// 		EVENTS_CHAINBATTLES.off(reviveFilter, handleReviveEvent);
+	// 		EVENTS_CHAINBATTLES.on(killedFilter, handleKilledEvent);
+	// 	};
+	// });
 
 	$: console.log('NFT URIs', $userNftChar, $enemyNftChar, $userCharStats?.life.toNumber());
 </script>
@@ -276,13 +296,13 @@
 
 	<div class="flex items-center justify-between px-10">
 		<div class="pt-40">
-			<div>
+			<!-- <div>
 				<p>Damage Dealt:</p>
 				<p>XP Gained:</p>
 				<p>Damage Taken:</p>
-			</div>
+			</div> -->
 			<div class="relative">
-				{#if latestAttackEvents?.length}
+				{#if latestAttackEvents?.length && $resolvedTransactions.length && $resolvedTransactions[0].status != 'Failed'}
 					<div
 						style="transform: translate({$positionXdamage}px, {$positionYdamage}px)"
 						class={'absolute animation w-full flex items-center justify-center space-x-4 ' +
@@ -344,7 +364,7 @@
 				>
 			</div>
 		</div>
-		<div class={'relative w-40 text-center ' + ($attackAnimation ? '' : 'hidden')}>
+		<div class={'relative w-40 text-center z-50 ' + ($attackAnimation ? '' : 'hidden')}>
 			<div
 				style="opacity: {$opacity}; transform: translate({$positionXenemy}px, {$positionYenemy}px)"
 				class={'absolute animation w-full flex items-center justify-start ' +
@@ -361,7 +381,7 @@
 			</div>
 		</div>
 		<div class="relative">
-			{#if latestAttackEvents?.length}
+			{#if latestAttackEvents?.length && $resolvedTransactions.length && $resolvedTransactions[0].status != 'Failed'}
 				<div
 					style="transform: translate({$positionXdamage}px, {$positionYdamage}px)"
 					class={'absolute animation w-full flex items-center justify-center space-x-4 ' +
@@ -376,11 +396,11 @@
 				</div>
 			{/if}
 			<img class="rounded-lg w-80" src={$enemyNftChar?.image || ''} alt="SVG" />
-			<div>
+			<!-- <div>
 				<p>Damage Dealt:</p>
 				<p>XP Gained:</p>
 				<p>Damage Taken:</p>
-			</div>
+			</div> -->
 		</div>
 	</div>
 </div>

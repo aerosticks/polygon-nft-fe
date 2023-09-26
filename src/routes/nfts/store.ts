@@ -14,3 +14,4 @@ export const healAnimation = writable(false);
 export const reviveAnimation = writable(false);
 export const xpAnimation = writable(false);
 export const killAnimation = writable(false);
+export const mintAnimation = writable(false);
