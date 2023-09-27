@@ -17,11 +17,15 @@
 	import { broadcastTransaction } from 'src/stores/transactions';
 	import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
+  import {mintGasEstimate} from 'src/hooks/gas'
 
 	import HammerIcon from `~icons/game-icons/thor-hammer`;
+	import { BigNumber, ethers } from 'ethers';
 
 	$: console.log('RESOLVED TXS', $resolvedTransactions);
 	$: console.log('PENDING TXS ', $pendingTransactions);
+
+	let mintGas = $mintGasEstimate;
 
 	// $: console.log('CONTRACT\n', $sdk.CHAINBATTLES);
 	$: console.log('MINT', $mintCharEvents);
@@ -37,8 +41,8 @@
 		$connected && $signerAddress ? sortByOwner($mintCharEvents || []) : $mintCharEvents || [];
 	$: console.log('MINTED by Owner ', mintedEvents || []);
 
-	$: ownerTokenIds = filterOwnerTokenIds($mintCharEvents || []);
-	$: console.log('OWNER TOKENS ', ownerTokenIds);
+	// $: ownerTokenIds = filterOwnerTokenIds($mintCharEvents || []);
+	// $: console.log('OWNER TOKENS ', ownerTokenIds);
 
 	$: ownerURIs = getAllTokenURI(filterOwnerTokenIds($mintCharEvents || []));
 	$: console.log('URIS\n', $ownerURIs);
@@ -97,7 +101,11 @@
 </script>
 
 <div>
-	<h1>Chain Battles - My NFT Gallery</h1>
+	{#if $connected}
+		<h1>Chain Battles - My NFT Gallery</h1>
+	{:else}
+		<h1>Chain Battles - NFT Gallery</h1>
+	{/if}
 
 	<div class="w-full my-4 flex items-center justify-center relative">
 		<button
@@ -105,7 +113,10 @@
 			class={'border border-black bg-slate-200 hover:bg-slate-300 px-2 py-1 ' +
 				(!$connected ? 'text-gray-400 cursor-not-allowed bg-slate-100 hover:bg-slate-100' : '')}
 			on:click={(_) => {
-				broadcastTransaction('Minting', $sdk?.CHAINBATTLES.connect($signer).mint())
+				broadcastTransaction(
+					'Minting',
+					$sdk?.CHAINBATTLES.connect($signer).mint({ gasLimit: mintGas })
+				)
 					.then((res) => {
 						console.log('start minting', res);
 						eventMintTrigger.update((value) => !value);
