@@ -47,6 +47,8 @@
 	import { spring } from 'svelte/motion';
 	import { cubicIn, cubicOut } from 'svelte/easing';
 	import { broadcastTransaction, resolvedTransactions } from 'src/stores/transactions';
+	import {attackGasEstimate, healGasEstimate, reviveGasEstimate} from 'src/hooks/gas';
+	import type BigNumberish  from 'ethers';
 
 	import SwordIcon from `~icons/game-icons/pointy-sword`;
 	import DamageIcon from '~icons/mdi/sword-cross';
@@ -173,6 +175,24 @@
 	$: console.log('TOKEN ARRAY ', extractNumbersFromString($page?.url?.pathname));
 	$: fightingTokenIds = extractNumbersFromString($page?.url?.pathname);
 
+	const attackGasEstimateStore =  attackGasEstimate(extractNumbersFromString($page?.url?.pathname)[0], extractNumbersFromString($page?.url?.pathname)[1]);
+	let attackGas: BigNumberish;
+	attackGasEstimateStore.subscribe(value => {
+		attackGas = value;
+	});
+
+	const healGasEstimateStore =  healGasEstimate(extractNumbersFromString($page?.url?.pathname)[0]);
+	let healGas: BigNumberish;
+	healGasEstimateStore.subscribe(value => {
+		healGas = value;
+	})
+
+	const reviveGasEstimateStore =  reviveGasEstimate(extractNumbersFromString($page?.url?.pathname)[0]);
+	let reviveGas: BigNumberish;
+	reviveGasEstimateStore.subscribe(value => {
+		reviveGas = value;
+	})
+
 	$: userCharStats = getCharacterNFT(Number(fightingTokenIds[0]));
 	$: enemyCharStats = getCharacterNFT(Number(fightingTokenIds[1]));
 	$: userNftChar = getTokenURI(Number(fightingTokenIds[0]));
@@ -180,10 +200,11 @@
 
 	function fightNft() {
 		console.log('fight tokens', Number(fightingTokenIds[0]), Number(fightingTokenIds[1]));
+		
 		broadcastTransaction(
 			'Fighting',
 		$sdk.CHAINBATTLES?.connect($signer)
-			.attack(Number(fightingTokenIds[0]), Number(fightingTokenIds[1]))
+			.attack(Number(fightingTokenIds[0]), Number(fightingTokenIds[1]), {gasLimit: attackGas})
 		)
 		.then((res) => {
 					console.log('start fight', res);
@@ -200,7 +221,7 @@
 			'Healing',
 
 			$sdk.CHAINBATTLES?.connect($signer)
-				.heal(Number(fightingTokenIds[0]))
+				.heal(Number(fightingTokenIds[0]), {gasLimit: healGas})
 				
 		).then((res) => {
 					console.log('start healing ', res);
@@ -218,7 +239,7 @@
 			'Reviving',
 
 			$sdk.CHAINBATTLES.connect($signer)
-				.revive(Number(fightingTokenIds[0]))
+				.revive(Number(fightingTokenIds[0]), {gasLimit: reviveGas})
 				
 		).then((res) => {
 					console.log('start reviving ', res);
