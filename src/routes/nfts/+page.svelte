@@ -16,8 +16,8 @@
 	import { pendingTransactions, resolvedTransactions } from 'src/stores/transactions';
 	import { broadcastTransaction } from 'src/stores/transactions';
 	import { tweened } from 'svelte/motion';
-  import { cubicOut } from 'svelte/easing';
-  import {mintGasEstimate} from 'src/hooks/gas'
+	import { cubicOut } from 'svelte/easing';
+	import { mintGasEstimate } from 'src/hooks/gas';
 
 	import HammerIcon from `~icons/game-icons/thor-hammer`;
 	import { BigNumber, ethers } from 'ethers';
@@ -28,17 +28,16 @@
 	let mintGas = $mintGasEstimate;
 
 	// $: console.log('CONTRACT\n', $sdk.CHAINBATTLES);
-	$: console.log('MINT', $mintCharEvents);
-	$: console.log('owner address ', mintedEvents[0]?.owner);
+	// $: console.log('MINT', $mintCharEvents);
+	// $: console.log('owner address ', mintedEvents[0]?.owner);
 
-	$: nft = getCharacterNFT(1);
-	$: console.log('CHAR STATS token 1', $nft);
+	// $: nft = getCharacterNFT(1);
+	// $: console.log('CHAR STATS token 1', $nft);
 
 	// $: nftURI = getTokenURI(1);
 
 	// $: mintedEvents = $mintCharEvents || [];
-	$: mintedEvents =
-		$connected && $signerAddress ? sortByOwner($mintCharEvents || []) : $mintCharEvents || [];
+	$: mintedEvents = $connected && $signerAddress ? sortByOwner($mintCharEvents) : $mintCharEvents;
 	$: console.log('MINTED by Owner ', mintedEvents || []);
 
 	// $: ownerTokenIds = filterOwnerTokenIds($mintCharEvents || []);
@@ -53,7 +52,7 @@
 	}
 
 	function filterOwnerTokenIds(mintEvents: MintedEvents[]) {
-		let tokenIds = mintEvents.map((mint) => mint.tokenId);
+		let tokenIds = mintEvents?.map((mint) => mint.tokenId);
 		return tokenIds;
 	}
 
@@ -80,17 +79,17 @@
 	// Create a tweened variable for the rotation angle
 	const rotation = tweened(0, {
 		duration: 1000, // Adjust duration as needed
-		easing: cubicOut,
+		easing: cubicOut
 	});
 
 	// Function to toggle the rotation animation
 	function toggleRotation() {
 		setTimeout(() => {
-		rotation.set(45); // Rotate 45 degrees
-		setTimeout(() => {
-			rotation.set(0); // Reset rotation to 0 degrees
-			toggleRotation(); // Repeat the animation
-		}, 1000); // 1000 milliseconds = 1 second (duration of 1 rotation)
+			rotation.set(45); // Rotate 45 degrees
+			setTimeout(() => {
+				rotation.set(0); // Reset rotation to 0 degrees
+				toggleRotation(); // Repeat the animation
+			}, 1000); // 1000 milliseconds = 1 second (duration of 1 rotation)
 		}, 1000); // 2000 milliseconds = 2 seconds (repeat every 2 seconds)
 	}
 

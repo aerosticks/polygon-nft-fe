@@ -11,6 +11,7 @@ import {
 	eventKilledTrigger,
 	eventMintTrigger
 } from 'src/routes/nfts/store';
+import type { BigNumber, BigNumberish } from 'ethers';
 
 const asyncGetCharacterNFT = async (sdk: PolygonMumbaiSdk, tokenId: number) => {
 	// console.log('SDK INFO', sdk);
@@ -21,7 +22,19 @@ const asyncGetCharacterNFT = async (sdk: PolygonMumbaiSdk, tokenId: number) => {
 	return nft;
 };
 
-export const getCharacterNFT = (tokenId: number) =>
+export const getCharacterNFT = (
+	tokenId: number
+): Readable<{
+	alive: boolean;
+	class: string;
+	id: BigNumber;
+	initialized: boolean;
+	level: BigNumber;
+	life: BigNumber;
+	owner: string;
+	speed: BigNumber;
+	strength: BigNumber;
+}> =>
 	derived(
 		[sdk, eventTrainTrigger, eventAttackTrigger, eventHealTrigger, eventReviveTrigger],
 		([$sdk, $eventXPTrigger, $eventAttackTrigger, $eventHealTrigger, $eventReviveTrigger], set) => {
@@ -45,7 +58,9 @@ export type NFTURI = {
 	image: string;
 };
 
-export const getTokenURI = (tokenId: number) =>
+export const getTokenURI = (
+	tokenId: number
+): Readable<{ image: string; descritption: string; name: string }> =>
 	derived(
 		[sdk, eventAttackTrigger, eventHealTrigger, eventReviveTrigger],
 		([$sdk, $eventAttackTrigger, $eventHealTrigger, $eventReviveTrigger], set) => {
@@ -70,7 +85,9 @@ const asyncAllGetTokenURI = async (sdk: PolygonMumbaiSdk, tokenIds: number[]) =>
 	return uris;
 };
 
-export const getAllTokenURI = (tokenIds: number[]) =>
+export const getAllTokenURI = (
+	tokenIds: number[]
+): Readable<{ name: string; description: string; image: string }[]> =>
 	derived([sdk, eventMintTrigger], ([$sdk, $eventMintTrigger], set) => {
 		if (!$sdk) return;
 		console.log('get uris after events');

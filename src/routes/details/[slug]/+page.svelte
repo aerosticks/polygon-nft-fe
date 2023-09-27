@@ -151,7 +151,11 @@
 					</div>
 					<div class="flex items-center space-x-1">
 						<HealthIcon class="w-6" />
-						<progress class="border border-black w-[90%]" max="100" value={$nftChar?.life || 0} />
+						<progress
+							class="border border-black w-[90%]"
+							max="100"
+							value={$nftChar?.life.toNumber() || 0}
+						/>
 					</div>
 				</div>
 			</div>

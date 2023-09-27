@@ -47,8 +47,8 @@
 	import { spring } from 'svelte/motion';
 	import { cubicIn, cubicOut } from 'svelte/easing';
 	import { broadcastTransaction, resolvedTransactions } from 'src/stores/transactions';
-	import {attackGasEstimate, healGasEstimate, reviveGasEstimate} from 'src/hooks/gas';
-	import type BigNumberish  from 'ethers';
+	import { attackGasEstimate, healGasEstimate, reviveGasEstimate } from 'src/hooks/gas';
+	import { type BigNumberish } from 'ethers';
 
 	import SwordIcon from `~icons/game-icons/pointy-sword`;
 	import DamageIcon from '~icons/mdi/sword-cross';
@@ -105,26 +105,24 @@
 	function toggleOpacityEvery1Second() {
 		setInterval(() => {
 			opacity.set($opacity === 0 ? 1 : 0);
-
 		}, 1500);
 	}
 
 	function toggleDamageAnimation() {
 		setTimeout(() => {
-				positionXdamage.set(0);
-				positionYdamage.set(100)
-			
-				// xpAnimation.update(value => value = false)
-				 xpAnimation.update(value => value = false)
+			positionXdamage.set(0);
+			positionYdamage.set(100);
 
-		}, 4000)
+			// xpAnimation.update(value => value = false)
+			xpAnimation.update((value) => (value = false));
+		}, 4000);
 	}
 	// afterUpdate(() => {
 	// 	if($resolvedTransactions.length && $resolvedTransactions[0].status != 'Failed') {
 	// 		console.log('showing damage')
 	// 		if ($xpAnimation == true) {
 	// 		toggleDamageAnimation();
-			
+
 	// 		}
 	// 	}
 	// });
@@ -133,32 +131,32 @@
 
 	function toggleAnimation() {
 		setTimeout(() => {
-		if (!isFadingOut) {
-			positionX.set(100);
-			positionY.set(0);
-		} else {
-			positionX.set(0);
-			positionY.set(50);
-		}
+			if (!isFadingOut) {
+				positionX.set(100);
+				positionY.set(0);
+			} else {
+				positionX.set(0);
+				positionY.set(50);
+			}
 
-		isFadingOut = !isFadingOut;
-		toggleAnimation(); 
-		},  1500);
+			isFadingOut = !isFadingOut;
+			toggleAnimation();
+		}, 1500);
 	}
 
 	function toggleAnimationEnemy() {
 		setTimeout(() => {
-		if (!isFadingOut) {
-			positionXenemy.set(0);
-			positionYenemy.set(-100);
-		} else {
-			positionXenemy.set(-100);
-			positionYenemy.set(-50);
-		}
+			if (!isFadingOut) {
+				positionXenemy.set(0);
+				positionYenemy.set(-100);
+			} else {
+				positionXenemy.set(-100);
+				positionYenemy.set(-50);
+			}
 
-		// isFadingOut = !isFadingOut;
-		toggleAnimationEnemy(); 
-		},  1500);
+			// isFadingOut = !isFadingOut;
+			toggleAnimationEnemy();
+		}, 1500);
 	}
 
 	onMount(() => {
@@ -175,44 +173,53 @@
 	$: console.log('TOKEN ARRAY ', extractNumbersFromString($page?.url?.pathname));
 	$: fightingTokenIds = extractNumbersFromString($page?.url?.pathname);
 
-	const attackGasEstimateStore =  attackGasEstimate(extractNumbersFromString($page?.url?.pathname)[0], extractNumbersFromString($page?.url?.pathname)[1]);
+	const attackGasEstimateStore = attackGasEstimate(
+		extractNumbersFromString($page?.url?.pathname)[0],
+		extractNumbersFromString($page?.url?.pathname)[1]
+	);
 	let attackGas: BigNumberish;
-	attackGasEstimateStore.subscribe(value => {
+	attackGasEstimateStore.subscribe((value) => {
 		attackGas = value;
 	});
 
-	const healGasEstimateStore =  healGasEstimate(extractNumbersFromString($page?.url?.pathname)[0]);
+	const healGasEstimateStore = healGasEstimate(extractNumbersFromString($page?.url?.pathname)[0]);
 	let healGas: BigNumberish;
-	healGasEstimateStore.subscribe(value => {
+	healGasEstimateStore.subscribe((value) => {
 		healGas = value;
-	})
+	});
 
-	const reviveGasEstimateStore =  reviveGasEstimate(extractNumbersFromString($page?.url?.pathname)[0]);
+	const reviveGasEstimateStore = reviveGasEstimate(
+		extractNumbersFromString($page?.url?.pathname)[0]
+	);
 	let reviveGas: BigNumberish;
-	reviveGasEstimateStore.subscribe(value => {
+	reviveGasEstimateStore.subscribe((value) => {
 		reviveGas = value;
-	})
+	});
 
 	$: userCharStats = getCharacterNFT(Number(fightingTokenIds[0]));
 	$: enemyCharStats = getCharacterNFT(Number(fightingTokenIds[1]));
 	$: userNftChar = getTokenURI(Number(fightingTokenIds[0]));
 	$: enemyNftChar = getTokenURI(Number(fightingTokenIds[1]));
 
+	$: console.log('user chart stats ', $userNftChar);
+
 	function fightNft() {
 		console.log('fight tokens', Number(fightingTokenIds[0]), Number(fightingTokenIds[1]));
-		
+
 		broadcastTransaction(
 			'Fighting',
-		$sdk.CHAINBATTLES?.connect($signer)
-			.attack(Number(fightingTokenIds[0]), Number(fightingTokenIds[1]), {gasLimit: attackGas})
+			$sdk.CHAINBATTLES?.connect($signer).attack(
+				Number(fightingTokenIds[0]),
+				Number(fightingTokenIds[1]),
+				{ gasLimit: attackGas }
+			)
 		)
-		.then((res) => {
-					console.log('start fight', res);
-					eventAttackTrigger.update((value) => !value);
-					attackAnimation.update((value) => (value = true))
-					
-				})
-				.catch((err) => console.warn('error fighting', err))
+			.then((res) => {
+				console.log('start fight', res);
+				eventAttackTrigger.update((value) => !value);
+				attackAnimation.update((value) => (value = true));
+			})
+			.catch((err) => console.warn('error fighting', err));
 	}
 
 	function healNft() {
@@ -220,17 +227,16 @@
 		broadcastTransaction(
 			'Healing',
 
-			$sdk.CHAINBATTLES?.connect($signer)
-				.heal(Number(fightingTokenIds[0]), {gasLimit: healGas})
-				
-		).then((res) => {
-					console.log('start healing ', res);
-					eventHealTrigger.update(value => !value);
-					healAnimation.update((value) => (value = true));
-				})
-				.catch((err) => {
-					console.warn('error healing ', err);
-				});
+			$sdk.CHAINBATTLES?.connect($signer).heal(Number(fightingTokenIds[0]), { gasLimit: healGas })
+		)
+			.then((res) => {
+				console.log('start healing ', res);
+				eventHealTrigger.update((value) => !value);
+				healAnimation.update((value) => (value = true));
+			})
+			.catch((err) => {
+				console.warn('error healing ', err);
+			});
 	}
 
 	function reviveNft() {
@@ -238,17 +244,18 @@
 		broadcastTransaction(
 			'Reviving',
 
-			$sdk.CHAINBATTLES.connect($signer)
-				.revive(Number(fightingTokenIds[0]), {gasLimit: reviveGas})
-				
-		).then((res) => {
-					console.log('start reviving ', res);
-					eventReviveTrigger.update(value => !value);
-					reviveAnimation.update((value) => (value = true));
-				})
-				.catch((err) => {
-					console.warn('error reviving ', err);
-				});
+			$sdk.CHAINBATTLES.connect($signer).revive(Number(fightingTokenIds[0]), {
+				gasLimit: reviveGas
+			})
+		)
+			.then((res) => {
+				console.log('start reviving ', res);
+				eventReviveTrigger.update((value) => !value);
+				reviveAnimation.update((value) => (value = true));
+			})
+			.catch((err) => {
+				console.warn('error reviving ', err);
+			});
 	}
 
 	// onMount(() => {
