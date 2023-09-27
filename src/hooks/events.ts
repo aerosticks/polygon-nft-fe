@@ -249,17 +249,25 @@ const asyncHealEvents = async (sdk: PolygonMumbaiSdk) => {
 	return filteredInfo;
 };
 
-export const healEvents = derived([sdk, eventHealTrigger], ([$sdk, $eventHealTrigger], set) => {
-	if (!$sdk) return;
-	console.log('fetch heal events');
-	asyncHealEvents($sdk)
-		.then((res) => {
-			set(res);
-		})
-		.catch((err) => {
-			console.warn(err);
-		});
-});
+export type HealEvents = {
+	tokenId: number;
+	healAmount: number;
+};
+
+export const healEvents: Readable<HealEvents[]> = derived(
+	[sdk, eventHealTrigger],
+	([$sdk, $eventHealTrigger], set) => {
+		if (!$sdk) return;
+		console.log('fetch heal events');
+		asyncHealEvents($sdk)
+			.then((res) => {
+				set(res);
+			})
+			.catch((err) => {
+				console.warn(err);
+			});
+	}
+);
 
 async function decodeHealEvents(healEvents) {
 	// console.log('decode events\n', mintEvents);
@@ -275,6 +283,10 @@ async function decodeHealEvents(healEvents) {
 	return heals;
 }
 
+export type ReviveEvents = {
+	tokenId: number;
+};
+
 const asyncReviveEvents = async (sdk: PolygonMumbaiSdk) => {
 	let events = await sdk.CHAINBATTLES.queryFilter('Revived', 39851776, 'latest');
 
@@ -285,7 +297,7 @@ const asyncReviveEvents = async (sdk: PolygonMumbaiSdk) => {
 	return filteredInfo;
 };
 
-export const revivedEvents = derived(
+export const revivedEvents: Readable<ReviveEvents[]> = derived(
 	[sdk, eventReviveTrigger],
 	([$sdk, $eventReviveTrigger], set) => {
 		if (!$sdk) return;

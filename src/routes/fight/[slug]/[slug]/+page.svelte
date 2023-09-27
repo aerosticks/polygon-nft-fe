@@ -45,13 +45,15 @@
 	} from 'src/routes/nfts/store';
 	import { tweened } from 'svelte/motion';
 	import { spring } from 'svelte/motion';
-	import { cubicIn, cubicOut } from 'svelte/easing';
+	import { cubicIn, cubicOut, cubicInOut } from 'svelte/easing';
 	import { broadcastTransaction, resolvedTransactions } from 'src/stores/transactions';
 	import { attackGasEstimate, healGasEstimate, reviveGasEstimate } from 'src/hooks/gas';
 	import { type BigNumberish } from 'ethers';
 
 	import SwordIcon from `~icons/game-icons/pointy-sword`;
 	import DamageIcon from '~icons/mdi/sword-cross';
+	import HealthIcon from `~icons/solar/health-bold`;
+	import ReviveIcon from `~icons/game-icons/angel-outfit`;
 
 	function extractNumbersFromString(inputString: string) {
 		const numberArray = [];
@@ -127,6 +129,38 @@
 	// 	}
 	// });
 
+	const scale = tweened(1, {
+		duration: 1000, // Adjust duration as needed
+		easing: cubicOut,
+	});
+
+	// Function to toggle the scale animation
+	function toggleScale() {
+		setTimeout(() => {
+		scale.set(1.2); // Grow by 20%
+		setTimeout(() => {
+			scale.set(1); // Reset scale to 1 (original size)
+			toggleScale(); // Repeat the animation
+		}, 1000); // 1000 milliseconds = 1 second (duration of 1 cycle)
+		}, 1000); // 2000 milliseconds = 2 seconds (repeat every 2 seconds)
+	}
+
+	const translateY = tweened(0, {
+		duration: 1000, // Adjust duration as needed
+		easing: cubicOut,
+	});
+
+	// Function to toggle the bounce animation
+	function toggleBounce() {
+		setTimeout(() => {
+		translateY.set(-20); 
+		setTimeout(() => {
+			translateY.set(0, { duration: 1000 }); 
+			toggleBounce(); // Repeat the animation
+		}, 1000); 
+		}, 1000); 
+	}
+
 	let isFadingOut = false;
 
 	function toggleAnimation() {
@@ -163,10 +197,13 @@
 		toggleOpacityEvery1Second();
 		toggleAnimation();
 		toggleAnimationEnemy();
+		toggleScale();
+		toggleBounce();
 		// toggleDamageAnimation();
 	});
 
 	$: latestAttackEvents = $attackEvents;
+	$: latestHealEvents = $healEvents;
 
 	$: console.log('attack EVENTS ', latestAttackEvents);
 
@@ -330,7 +367,7 @@
 				<p>Damage Taken:</p>
 			</div> -->
 			<div class="relative">
-				{#if latestAttackEvents?.length && $resolvedTransactions.length && $resolvedTransactions[0].status != 'Failed'}
+				{#if $attackEvents?.length && $resolvedTransactions.length && $resolvedTransactions[0].status != 'Failed'}
 					<div
 						style="transform: translate({$positionXdamage}px, {$positionYdamage}px)"
 						class={'absolute animation w-full flex items-center justify-center space-x-4 ' +
@@ -342,6 +379,19 @@
 								- {latestAttackEvents[latestAttackEvents?.length - 1]?.defenderDamage}
 							</p>
 						</div>
+					</div>
+				{/if}
+				{#if $healEvents?.length && $resolvedTransactions.length && $resolvedTransactions[0].status != 'Failed'}
+					<div class={`absolute left-[30%] top-[30%]`} style="transform: scale({$scale});">
+						<HealthIcon class="w-32 h-32 text-red-500 scale-animation" />
+					</div>
+				{/if}
+				{#if $revivedEvents?.length && $resolvedTransactions.length && $resolvedTransactions[0].status != 'Failed'}
+					<div
+						class={'absolute left-[30%] top-[30%]  border border-red-500 w-full h-full '}
+						style="transform: translateY({$translateY}%);"
+					>
+						<ReviveIcon class="w-32 h-32 text-slate-300 bounce-animation " />
 					</div>
 				{/if}
 				<img class="rounded-lg w-80" src={$userNftChar?.image || ''} alt="SVG" />
@@ -440,5 +490,18 @@
 
 	.animation.inactive {
 		transform: scale(0);
+	}
+
+	.scale-animation {
+		width: 100px; /* Adjust the initial width as needed */
+		height: 100px; /* Adjust the initial height as needed */
+		transition: transform 1s ease-in-out;
+	}
+
+	.bounce-animation {
+		width: 100%;
+		height: 100%;
+		background-color: blue; /* Example background color */
+		transition: transform 1s ease-in-out;
 	}
 </style>
