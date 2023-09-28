@@ -298,14 +298,14 @@
 						<ReviveIcon class="w-32 h-32 text-slate-300 bounce-animation " />
 					</div>
 				{/if}
-				<!-- {#if $trainedEvents?.length && $trainAnimation} -->
-				<div
-					class={'absolute left-[20%] top-[20%] w-full h-full '}
-					style="transform: translateY({$translateY2}%);"
-				>
-					<TrainIcon class="w-32 h-32 text-slate-300 bounce-animation " />
-				</div>
-				<!-- {/if} -->
+				{#if $trainedEvents?.length && $trainAnimation}
+					<div
+						class={'absolute left-[20%] top-[20%] w-full h-full '}
+						style="transform: translateY({$translateY2}%);"
+					>
+						<TrainIcon class="w-32 h-32 text-white bounce-animation " />
+					</div>
+				{/if}
 				<img class="rounded-lg" src={$nftURI?.image || ''} alt="SVG" />
 				<!-- <p>ID: {$nftChar?.id || ''}</p>
 				<p>Class: {$nftChar?.class || ''}</p>
