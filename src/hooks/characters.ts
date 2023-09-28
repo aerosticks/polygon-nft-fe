@@ -124,16 +124,41 @@ export const trainNft = (tokenId: number) =>
 			.catch((err) => console.error(err));
 	});
 
+export type XP = {
+	xpAmount: BigNumber;
+	healNeededAmount: BigNumber;
+	reviveNeededAmount: BigNumber;
+};
+
 const asyncGetXP = async (sdk: PolygonMumbaiSdk, userAddress: string) => {
 	let xpResult = await sdk.CHAINBATTLES.getXP(userAddress);
 
 	console.log('XP amount ', xpResult);
-	return xpResult.toNumber();
+	return xpResult;
 };
 
-export const getXP = derived(
-	[sdk, signerAddress, eventXPTrigger, eventAttackTrigger, eventTrainTrigger],
-	([$sdk, $signerAddress, $eventXPTrigger, $eventAttackTrigger, $eventTrainTrigger], set) => {
+export const getXP: Readable<XP> = derived(
+	[
+		sdk,
+		signerAddress,
+		eventXPTrigger,
+		eventAttackTrigger,
+		eventTrainTrigger,
+		eventReviveTrigger,
+		eventHealTrigger
+	],
+	(
+		[
+			$sdk,
+			$signerAddress,
+			$eventXPTrigger,
+			$eventAttackTrigger,
+			$eventTrainTrigger,
+			$eventReviveTrigger,
+			$eventHealTrigger
+		],
+		set
+	) => {
 		if (!$sdk) return;
 		console.log('fetch XP total');
 		asyncGetXP($sdk, $signerAddress)

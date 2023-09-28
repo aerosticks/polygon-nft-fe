@@ -18,7 +18,7 @@ import {
 } from 'src/routes/nfts/store';
 
 const asyncMintCharEvents = async (sdk: PolygonMumbaiSdk) => {
-	let events = await sdk.CHAINBATTLES.queryFilter('Minted', 39851776, 'latest');
+	let events = await sdk.CHAINBATTLES.queryFilter('Minted', 40605517, 'latest');
 
 	console.log('mint events ', events);
 
@@ -70,7 +70,7 @@ async function decodeMintedEvents(mintEvents) {
 }
 
 const asyncAttackEvents = async (sdk: PolygonMumbaiSdk) => {
-	let events = await sdk.CHAINBATTLES.queryFilter('Attacked', 39851776, 'latest');
+	let events = await sdk.CHAINBATTLES.queryFilter('Attacked', 40605517, 'latest');
 
 	const filteredInfo = await decodeAttackedEvents(events);
 
@@ -119,7 +119,7 @@ async function decodeAttackedEvents(attackEvents) {
 }
 
 const asyncBurnedEvents = async (sdk: PolygonMumbaiSdk) => {
-	let events = sdk.CHAINBATTLES.queryFilter('Burned', 39851776, 'latest');
+	let events = sdk.CHAINBATTLES.queryFilter('Burned', 40605517, 'latest');
 
 	const filteredInfo = await decodeBurnedEvents(events);
 	console.log('burn events', events);
@@ -160,7 +160,7 @@ async function decodeBurnedEvents(burnEvents) {
 }
 
 const asyncTrainedEvents = async (sdk: PolygonMumbaiSdk) => {
-	let events = await sdk.CHAINBATTLES.queryFilter('Trained', 39851776, 'latest');
+	let events = await sdk.CHAINBATTLES.queryFilter('Trained', 40605517, 'latest');
 
 	const filteredInfo = await decodeTrainedEvents(events);
 
@@ -205,7 +205,7 @@ async function decodeTrainedEvents(trainEvents) {
 }
 
 const asyncXPEvents = async (sdk: PolygonMumbaiSdk) => {
-	let events = await sdk.CHAINBATTLES.queryFilter('XPgained', 39851776, 'latest');
+	let events = await sdk.CHAINBATTLES.queryFilter('XPgained', 40605517, 'latest');
 
 	const filteredInfo = await decodeXPEvents(events);
 
@@ -214,16 +214,19 @@ const asyncXPEvents = async (sdk: PolygonMumbaiSdk) => {
 	return events;
 };
 
-export const xpGainedEvents = derived([sdk, eventXPTrigger], ([$sdk, $eventXPTrigger], set) => {
-	if (!$sdk) return;
-	asyncXPEvents($sdk)
-		.then((res) => {
-			set(res);
-		})
-		.catch((err) => {
-			console.warn(err);
-		});
-});
+export const xpGainedEvents = derived(
+	[sdk, eventXPTrigger, eventHealTrigger, eventReviveTrigger],
+	([$sdk, $eventXPTrigger, $eventHealTrigger, $eventReviveTrigger], set) => {
+		if (!$sdk) return;
+		asyncXPEvents($sdk)
+			.then((res) => {
+				set(res);
+			})
+			.catch((err) => {
+				console.warn(err);
+			});
+	}
+);
 
 async function decodeXPEvents(trainEvents) {
 	// console.log('decode events\n', mintEvents);
@@ -240,11 +243,11 @@ async function decodeXPEvents(trainEvents) {
 }
 
 const asyncHealEvents = async (sdk: PolygonMumbaiSdk) => {
-	let events = await sdk.CHAINBATTLES.queryFilter('Healed', 39851776, 'latest');
+	let events = await sdk.CHAINBATTLES.queryFilter('Healed', 40605517, 'latest');
 
 	const filteredInfo = await decodeHealEvents(events);
 
-	console.log('heal events', events);
+	console.log('heal events before decoding ', events);
 
 	return filteredInfo;
 };
@@ -270,12 +273,11 @@ export const healEvents: Readable<HealEvents[]> = derived(
 );
 
 async function decodeHealEvents(healEvents) {
-	// console.log('decode events\n', mintEvents);
 	let heals = [];
 	for (let i = 0; i < healEvents.length; i++) {
 		const heal = {
 			tokenId: healEvents[i].args.tokenId.toNumber(),
-			healAmount: healEvents[i].arg.healAmount.toNumber()
+			healAmount: healEvents[i].args.healAmount.toNumber()
 		};
 		heals.push(heal);
 	}
@@ -288,7 +290,7 @@ export type ReviveEvents = {
 };
 
 const asyncReviveEvents = async (sdk: PolygonMumbaiSdk) => {
-	let events = await sdk.CHAINBATTLES.queryFilter('Revived', 39851776, 'latest');
+	let events = await sdk.CHAINBATTLES.queryFilter('Revived', 40605517, 'latest');
 
 	const filteredInfo = await decodeReviveEvents(events);
 
@@ -326,7 +328,7 @@ async function decodeReviveEvents(reviveEvents) {
 }
 
 const asyncKilledEvents = async (sdk: PolygonMumbaiSdk) => {
-	let events = await sdk.CHAINBATTLES.queryFilter('Killed', 39851776, 'latest');
+	let events = await sdk.CHAINBATTLES.queryFilter('Killed', 40605517, 'latest');
 
 	const filteredInfo = await decodeKilledEvents(events);
 

@@ -6,8 +6,8 @@ import { ethers, type BigNumberish } from 'ethers';
 
 const asyncMintGas = async (sdk: PolygonMumbaiSdk, signerAddress: string) => {
 	let gas = await sdk.CHAINBATTLES.estimateGas.mint({ from: signerAddress });
-	console.log('mint gas estimate ', gas.toNumber() * 1.2);
-	return ethers.BigNumber.from(String(Math.ceil(gas.toNumber() * 1.2)));
+	console.log('mint gas estimate ', gas.toNumber() * 2);
+	return ethers.BigNumber.from(String(Math.ceil(gas.toNumber() * 2)));
 };
 
 export const mintGasEstimate: Readable<BigNumberish> = derived(
@@ -27,8 +27,8 @@ const asyncAttackGas = async (
 	token2: number
 ) => {
 	let gas = await sdk.CHAINBATTLES.estimateGas.attack(token1, token2, { from: signerAddress });
-	console.log('attack gas estimate ', gas.toNumber() * 1.2);
-	return ethers.BigNumber.from(String(Math.ceil(gas.toNumber() * 1.2)));
+	console.log('attack gas estimate ', gas.toNumber() * 2);
+	return ethers.BigNumber.from(String(Math.ceil(gas.toNumber() * 2)));
 };
 
 export const attackGasEstimate = (token1: number, token2: number): Readable<BigNumberish> =>
@@ -42,8 +42,8 @@ export const attackGasEstimate = (token1: number, token2: number): Readable<BigN
 
 const asyncHealGas = async (sdk: PolygonMumbaiSdk, signerAddress: string, token: number) => {
 	let gas = await sdk.CHAINBATTLES.estimateGas.heal(token, { from: signerAddress });
-	console.log('heal gas estimate ', gas.toNumber() * 1.2);
-	return ethers.BigNumber.from(String(Math.ceil(gas.toNumber() * 1.2)));
+	console.log('heal gas estimate ', gas.toNumber() * 2);
+	return ethers.BigNumber.from(String(Math.ceil(gas.toNumber() * 2)));
 };
 
 export const healGasEstimate = (token: number): Readable<BigNumberish> =>
@@ -56,8 +56,8 @@ export const healGasEstimate = (token: number): Readable<BigNumberish> =>
 
 const asyncReviveGas = async (sdk: PolygonMumbaiSdk, signerAddress: string, token: number) => {
 	let gas = await sdk.CHAINBATTLES.estimateGas.revive(token, { from: signerAddress });
-	console.log('revive gas estimate ', gas.toNumber() * 1.2);
-	return ethers.BigNumber.from(String(Math.ceil(gas.toNumber() * 1.2)));
+	console.log('revive gas estimate ', gas.toNumber() * 2);
+	return ethers.BigNumber.from(String(Math.ceil(gas.toNumber() * 2)));
 };
 
 export const reviveGasEstimate = (token: number): Readable<BigNumberish> =>
@@ -70,8 +70,8 @@ export const reviveGasEstimate = (token: number): Readable<BigNumberish> =>
 
 const asyncTrainGas = async (sdk: PolygonMumbaiSdk, signerAddress: string, token: number) => {
 	let gas = await sdk.CHAINBATTLES.estimateGas.train(token, { from: signerAddress });
-	console.log('train gas estimate ', gas.toNumber() * 1.2);
-	return ethers.BigNumber.from(String(Math.ceil(gas.toNumber() * 1.2)));
+	console.log('train gas estimate ', gas.toNumber() * 2);
+	return ethers.BigNumber.from(String(Math.ceil(gas.toNumber() * 2)));
 };
 
 export const trainGasEstimate = (token: number): Readable<BigNumberish> =>

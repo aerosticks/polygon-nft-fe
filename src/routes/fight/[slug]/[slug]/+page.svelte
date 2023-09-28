@@ -204,10 +204,13 @@
 
 	$: latestAttackEvents = $attackEvents;
 	$: latestHealEvents = $healEvents;
+	$: latestReviveEvents = $revivedEvents;
 
-	$: console.log('attack EVENTS ', latestAttackEvents);
+	$: console.log('attack EVENTS ', $attackEvents);
+	$: console.log('heal EVENTS ', $healEvents)
+	$: console.log('revive EVENTS ', $revivedEvents)
 
-	$: console.log('TOKEN ARRAY ', extractNumbersFromString($page?.url?.pathname));
+	// $: console.log('TOKEN ARRAY ', extractNumbersFromString($page?.url?.pathname));
 	$: fightingTokenIds = extractNumbersFromString($page?.url?.pathname);
 
 	const attackGasEstimateStore = attackGasEstimate(
@@ -238,7 +241,8 @@
 	$: userNftChar = getTokenURI(Number(fightingTokenIds[0]));
 	$: enemyNftChar = getTokenURI(Number(fightingTokenIds[1]));
 
-	$: console.log('user chart stats ', $userNftChar);
+	// $: console.log('user chart stats ', $userNftChar);
+	$: console.log('user char stats ', $userCharStats?.alive == false)
 
 	function fightNft() {
 		console.log('fight tokens', Number(fightingTokenIds[0]), Number(fightingTokenIds[1]));
@@ -353,7 +357,7 @@
 	// 	};
 	// });
 
-	$: console.log('NFT URIs', $userNftChar, $enemyNftChar, $userCharStats?.life.toNumber());
+	// $: console.log('NFT URIs', $userNftChar, $enemyNftChar, $userCharStats?.life.toNumber());
 </script>
 
 <div>
@@ -381,14 +385,14 @@
 						</div>
 					</div>
 				{/if}
-				{#if $healEvents?.length && $resolvedTransactions.length && $resolvedTransactions[0].status != 'Failed'}
+				{#if $healEvents?.length && $healAnimation}
 					<div class={`absolute left-[30%] top-[30%]`} style="transform: scale({$scale});">
 						<HealthIcon class="w-32 h-32 text-red-500 scale-animation" />
 					</div>
 				{/if}
-				{#if $revivedEvents?.length && $resolvedTransactions.length && $resolvedTransactions[0].status != 'Failed'}
+				{#if $revivedEvents?.length && $reviveAnimation}
 					<div
-						class={'absolute left-[30%] top-[30%]  border border-red-500 w-full h-full '}
+						class={'absolute left-[30%] top-[30%] w-full h-full '}
 						style="transform: translateY({$translateY}%);"
 					>
 						<ReviveIcon class="w-32 h-32 text-slate-300 bounce-animation " />
@@ -397,7 +401,7 @@
 				<img class="rounded-lg w-80" src={$userNftChar?.image || ''} alt="SVG" />
 			</div>
 			<div>
-				<p>Total XP: {$getXP}</p>
+				<p>Total XP: {$getXP?.xpAmount.toNumber()}</p>
 			</div>
 			<div class="space-x-2 py-2 flex items-center justify-center">
 				<button
@@ -414,22 +418,25 @@
 							: 'border-black bg-slate-200 hover:bg-slate-300')}>Attack</button
 				>
 				<button
-					disabled={($userCharStats?.life.toNumber() == 100 && $userCharStats?.alive == false) ||
-						Number($getXP) < 65}
+					disabled={$userCharStats?.life.toNumber() == 100 ||
+						$userCharStats?.alive == false ||
+						Number($getXP?.xpAmount.toNumber()) < Number($getXP?.healNeededAmount.toNumber())}
 					on:click={(_) => {
 						if ($userCharStats?.life.toNumber() != 100 && $userCharStats?.alive == true) {
 							healNft();
 						}
 					}}
 					class={'border  rounded-lg px-2 py-1 ' +
-						(($userCharStats?.life.toNumber() == 100 && $userCharStats?.alive == false) ||
-						Number($getXP) < 65
+						($userCharStats?.life.toNumber() == 100 ||
+						$userCharStats?.alive == false ||
+						Number($getXP?.xpAmount.toNumber()) < Number($getXP?.healNeededAmount.toNumber())
 							? 'bg-slate-100 hover:bg-slate-100 text-slate-300 border-slate-300'
 							: 'bg-slate-200 hover:bg-slate-300 border-black')}>Heal (65xp)</button
 				>
 				<button
-					disabled={$userCharStats?.alive == false}
+					disabled={$userCharStats?.alive == true}
 					on:click={(_) => {
+						console.log('token alive ', $userCharStats?.alive);
 						if ($userCharStats?.alive == false) {
 							reviveNft();
 						}

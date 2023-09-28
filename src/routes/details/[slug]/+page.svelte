@@ -23,14 +23,14 @@
 	import { goto } from '$app/navigation';
 
 
-	$: console.log('SDK', $sdk)
-    $: console.log('XP\n', $getXP)
+	// $: console.log('SDK', $sdk)
+    // $: console.log('XP\n', $getXP)
 
 	// $: userXP = getXP(signerAddress);
 
 	// $: console.log('PAGE DATA', $page.params.slug);
-    $: console.log('attacks', $attackEvents)
-	$: console.log('XP GAINED EVENTS', $xpGainedEvents)
+    // $: console.log('attacks', $attackEvents)
+	// $: console.log('XP GAINED EVENTS', $xpGainedEvents)
 
 	$: nftURI = getTokenURI(Number($page?.params?.slug));
 	$: nftChar = getCharacterNFT(Number($page?.params?.slug));
@@ -174,16 +174,16 @@
 
 		<div class="space-y-6">
 			<div>
-				<p class="text-xs">XP points available: {$getXP}</p>
+				<p class="text-xs">XP points available: {$getXP?.xpAmount.toNumber()}</p>
 				<button
 					on:click={(_) => levelUp()}
 					disabled={!$connected ||
 						$signerAddress != $nftChar?.owner ||
-						Number($getXP) < Number($requiredXP)}
+						Number($getXP?.xpAmount.toNumber()) < Number($requiredXP)}
 					class={'border border-black bg-slate-200 hover:bg-slate-300 rounded-lg px-4 py-1 ' +
 						(!$connected ||
 						$signerAddress != $nftChar?.owner ||
-						Number($getXP) < Number($requiredXP)
+						Number($getXP?.xpAmount.toNumber()) < Number($requiredXP)
 							? ' text-gray-400 cursor-not-allowed border-gray-400 bg-slate-100 hover:bg-slate-100'
 							: '')}>Train</button
 				>
