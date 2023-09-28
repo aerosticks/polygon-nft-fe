@@ -15,3 +15,4 @@ export const reviveAnimation = writable(false);
 export const xpAnimation = writable(false);
 export const killAnimation = writable(false);
 export const mintAnimation = writable(false);
+export const trainAnimation = writable(false);

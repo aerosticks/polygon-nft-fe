@@ -215,8 +215,8 @@ const asyncXPEvents = async (sdk: PolygonMumbaiSdk) => {
 };
 
 export const xpGainedEvents = derived(
-	[sdk, eventXPTrigger, eventHealTrigger, eventReviveTrigger],
-	([$sdk, $eventXPTrigger, $eventHealTrigger, $eventReviveTrigger], set) => {
+	[sdk, eventXPTrigger, eventHealTrigger, eventReviveTrigger, eventTrainTrigger],
+	([$sdk, $eventXPTrigger, $eventHealTrigger, $eventReviveTrigger, $eventTrainTrigger], set) => {
 		if (!$sdk) return;
 		asyncXPEvents($sdk)
 			.then((res) => {
