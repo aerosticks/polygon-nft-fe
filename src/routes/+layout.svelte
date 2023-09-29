@@ -22,8 +22,8 @@
 		xpAnimation,
 		killAnimation,
 		mintAnimation,
-		eventMintTrigger
-
+		eventMintTrigger,
+		trainAnimation
 	} from 'src/routes/nfts/store';
 
 	import NavBar from 'src/routes/navigation/+page.svelte';
@@ -92,6 +92,7 @@
 		healAnimation.update(value => value = false);
 		reviveAnimation.update(value => value = false);
 		mintAnimation.update(value => value = false);
+		trainAnimation.update(value => value = false);
 	}
 
 	$: if($resolvedTransactions.length) {

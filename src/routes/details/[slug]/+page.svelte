@@ -16,7 +16,7 @@
     import SpeedIcon from `~icons/mdi/rabbit`;
 	import HealthIcon from `~icons/solar/health-bold`;
 	import ReviveIcon from `~icons/game-icons/angel-outfit`;
-	import TrainIcon from `~icons/icon-park/dumbbell`;
+	import TrainIcon from `~icons/circum/dumbbell`;
 
     import EnemyDetails from 'src/routes/details/enemy.svelte';
 	import { onMount } from 'svelte';
@@ -300,10 +300,10 @@
 				{/if}
 				{#if $trainedEvents?.length && $trainAnimation}
 					<div
-						class={'absolute left-[20%] top-[20%] w-full h-full '}
+						class={'absolute left-[17%] top-[20%] w-full h-full  '}
 						style="transform: translateY({$translateY2}%);"
 					>
-						<TrainIcon class="w-32 h-32 text-white bounce-animation " />
+						<TrainIcon class="w-32 h-32 text-blue-500  bounce-animation " />
 					</div>
 				{/if}
 				<img class="rounded-lg" src={$nftURI?.image || ''} alt="SVG" />
@@ -357,11 +357,19 @@
 					}}
 					disabled={!$connected ||
 						$signerAddress != $nftChar?.owner ||
-						Number($getXP?.xpAmount.toNumber()) < Number($requiredXP)}
+						Number($getXP?.xpAmount.toNumber()) < Number($requiredXP) ||
+						Number($getXP?.xpAmount.toNumber()) == undefined ||
+						$healAnimation ||
+						$reviveAnimation ||
+						$trainAnimation}
 					class={'border  rounded-lg px-2 py-1 ' +
 						(!$connected ||
 						$signerAddress != $nftChar?.owner ||
-						Number($getXP?.xpAmount.toNumber()) >= Number($requiredXP)
+						Number($getXP?.xpAmount.toNumber()) >= Number($requiredXP) ||
+						Number($getXP?.xpAmount.toNumber()) == undefined ||
+						$healAnimation ||
+						$reviveAnimation ||
+						$trainAnimation
 							? 'bg-slate-200 hover:bg-slate-300 border-black'
 							: ' bg-slate-100 hover:bg-slate-100 text-slate-300 border-slate-300 cursor-default')}
 					>Train ({Number($requiredXP)}xp)</button
@@ -374,13 +382,24 @@
 						$signerAddress != $nftChar?.owner ||
 						$nftChar?.life.toNumber() == 100 ||
 						$nftChar?.alive == false ||
-						Number($getXP?.xpAmount.toNumber()) < Number($getXP?.healNeededAmount.toNumber())}
+						Number($getXP?.xpAmount.toNumber()) < Number($getXP?.healNeededAmount.toNumber()) ||
+						Number($getXP?.xpAmount.toNumber()) == undefined ||
+						$healAnimation ||
+						$reviveAnimation ||
+						$trainAnimation}
 					class={'border  rounded-lg px-2 py-1  ' +
 						(!$connected ||
 						$signerAddress != $nftChar?.owner ||
 						$nftChar?.life.toNumber() == 100 ||
 						$nftChar?.alive == false ||
-						Number($getXP?.xpAmount.toNumber()) < Number($getXP?.healNeededAmount.toNumber())
+						Number($getXP?.xpAmount.toNumber()) <
+							Number(
+								$getXP?.healNeededAmount.toNumber() ||
+									Number($getXP?.xpAmount.toNumber()) == undefined ||
+									$healAnimation ||
+									$reviveAnimation ||
+									$trainAnimation
+							)
 							? 'bg-slate-100 hover:bg-slate-100 text-slate-300 border-slate-300'
 							: 'bg-slate-200 hover:bg-slate-300 border-black')}
 					>Heal ({Number($getXP?.healNeededAmount.toNumber())}xp)</button
@@ -392,14 +411,19 @@
 					disabled={!$connected ||
 						$signerAddress != $nftChar?.owner ||
 						$nftChar?.alive == true ||
-						Number($getXP?.xpAmount.toNumber()) < Number($getXP?.reviveNeededAmount.toNumber())}
+						Number($getXP?.xpAmount.toNumber()) < Number($getXP?.reviveNeededAmount.toNumber()) ||
+						Number($getXP?.xpAmount.toNumber()) == undefined ||
+						$healAnimation ||
+						$reviveAnimation ||
+						$trainAnimation}
 					class={'border rounded-lg px-2 py-1  ' +
 						(!$connected ||
 						$signerAddress != $nftChar?.owner ||
 						$nftChar?.alive == false ||
-						Number($getXP?.xpAmount.toNumber()) >= Number($getXP?.reviveNeededAmount.toNumber())
-							? 'bg-slate-200 hover:bg-slate-300 border-black'
-							: ' bg-slate-100 hover:bg-slate-100 text-slate-300 border-slate-300 cursor-default')}
+						Number($getXP?.xpAmount.toNumber()) >= Number($getXP?.reviveNeededAmount.toNumber()) ||
+						Number($getXP?.xpAmount.toNumber()) != undefined
+							? 'bg-slate-100 hover:bg-slate-100 text-slate-300 border-slate-300'
+							: 'bg-slate-200 hover:bg-slate-300 border-black')}
 					>Revive ({Number($getXP?.reviveNeededAmount.toNumber())}xp)</button
 				>
 			</div>

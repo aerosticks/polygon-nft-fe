@@ -62,8 +62,11 @@ export const getTokenURI = (
 	tokenId: number
 ): Readable<{ image: string; descritption: string; name: string }> =>
 	derived(
-		[sdk, eventAttackTrigger, eventHealTrigger, eventReviveTrigger],
-		([$sdk, $eventAttackTrigger, $eventHealTrigger, $eventReviveTrigger], set) => {
+		[sdk, eventAttackTrigger, eventHealTrigger, eventReviveTrigger, eventTrainTrigger],
+		(
+			[$sdk, $eventAttackTrigger, $eventHealTrigger, $eventReviveTrigger, $eventTrainTrigger],
+			set
+		) => {
 			if (!$sdk) return;
 			asyncGetTokenURI($sdk, tokenId)
 				.then((res) => {

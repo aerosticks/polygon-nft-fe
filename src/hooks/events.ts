@@ -196,7 +196,7 @@ async function decodeTrainedEvents(trainEvents) {
 	for (let i = 0; i < trainEvents.length; i++) {
 		const train = {
 			trainId: trainEvents[i].args.tokenId.toNumber(),
-			newLevel: trainEvents[i].arg.newLevel.toNumber()
+			newLevel: trainEvents[i].args.newLevel.toNumber()
 		};
 		trains.push(train);
 	}
@@ -234,7 +234,7 @@ async function decodeXPEvents(trainEvents) {
 	for (let i = 0; i < trainEvents.length; i++) {
 		const train = {
 			owner: trainEvents[i].args.owner.toString(),
-			xpPoints: trainEvents[i].arg.xpPoints.toNumber()
+			xpPoints: trainEvents[i].args.xpPoints.toNumber()
 		};
 		trains.push(train);
 	}
